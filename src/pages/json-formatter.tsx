@@ -10,7 +10,8 @@ const JsonFormatter: React.FC = () => {
             const obj = JSON.parse(input);
             setFormatted(JSON.stringify(obj, null, 2));
             setError(null);
-        } catch (e: any) {
+        } catch (e: unknown) {
+            console.error(e);
             setFormatted(null);
             setError('無効なJSONです');
         }
