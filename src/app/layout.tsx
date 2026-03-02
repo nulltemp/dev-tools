@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
-import { Roboto } from 'next/font/google';
-import { ThemeProvider } from '@mui/material/styles';
-import theme from './theme';
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { Roboto } from "next/font/google";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "./theme";
 import "./globals.css";
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 
 const roboto = Roboto({
-  weight: ['300', '400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-roboto',
+  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-roboto",
 });
 
 export const metadata: Metadata = {
@@ -31,7 +31,51 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-            {children}
+            <div style={{ display: "flex" }}>
+              <aside
+                style={{
+                  width: "200px",
+                  backgroundColor: "#fff",
+                  padding: "1rem",
+                  borderRight: `1px solid #e0e0e0`,
+                  position: "fixed",
+                  height: "100vh",
+                  top: 0,
+                  left: 0,
+                }}
+              >
+                <h3>ツール</h3>
+                <nav>
+                  <ul style={{ listStyle: "none", padding: 0 }}>
+                    <li style={{ marginBottom: "0.5rem" }}>
+                      <a
+                        href="/char-count"
+                        style={{
+                          textDecoration: "none",
+                          color: "#000",
+                        }}
+                      >
+                        文字数カウンター
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/json-formatter"
+                        style={{
+                          textDecoration: "none",
+                          color: "#000",
+                        }}
+                      >
+                        JSON整形
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </aside>
+              <main style={{ flex: 1, padding: "2rem", marginLeft: "200px" }}>
+                {children}
+              </main>
+            </div>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
