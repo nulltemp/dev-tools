@@ -18,6 +18,12 @@ export default function Home() {
               <p>JSONデータを整形して表示します</p>
             </div>
           </Link>
+          <Link href="/jwt-decoder" className="card">
+            <div className="card-content">
+              <h3>JWTデコーダー</h3>
+              <p>JWTのヘッダーとペイロードをデコードして表示します</p>
+            </div>
+          </Link>
         </div>
       </main>
     </div>

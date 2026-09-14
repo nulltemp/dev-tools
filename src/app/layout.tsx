@@ -58,7 +58,7 @@ export default function RootLayout({
                         文字数カウンター
                       </a>
                     </li>
-                    <li>
+                    <li style={{ marginBottom: "0.5rem" }}>
                       <a
                         href="/json-formatter"
                         style={{
@@ -67,6 +67,17 @@ export default function RootLayout({
                         }}
                       >
                         JSON整形
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="/jwt-decoder"
+                        style={{
+                          textDecoration: "none",
+                          color: "#000",
+                        }}
+                      >
+                        JWTデコーダー
                       </a>
                     </li>
                   </ul>
