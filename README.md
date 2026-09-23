@@ -2,7 +2,7 @@
 
 小さな独立したデベロッパー向けユーティリティツール集です。Next.js (App Router) 製で、以下のURLに公開されています。
 
-https://dev-tools-lovat.vercel.app/
+https://dev-tools.nulltemp.com
 
 ## 現在のツール
 
@@ -34,7 +34,3 @@ npm run lint     # next lint
 スタイリングは MUI (Material UI) と `src/app/globals.css` のユーティリティクラス（`.container`, `.cards`, `.card`, `.input-section` など）を併用しています。既存のクラスがあれば新規CSSを追加せず再利用してください。
 
 詳細なアーキテクチャ方針は [CLAUDE.md](./CLAUDE.md) を参照してください。
-
-## Deploy
-
-[Vercel](https://vercel.com/) にデプロイされています。
