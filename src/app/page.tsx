@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { tools } from "./tools";
+import JsonLd from "./JsonLd";
+import { siteJsonLd, tools } from "./tools";
 
 export default function Home() {
   return (
     <div className="container">
+      <JsonLd data={siteJsonLd()} />
       <div className="main">
         <h1 className="title">デベロッパーツール</h1>
         <div className="cards">

@@ -22,8 +22,12 @@ This is a Next.js (App Router) collection of small, independent developer utilit
 
 - **Adding a new tool**:
   1. create `src/app/<tool-name>/page.tsx` (client component)
-  2. add an entry (`href`, `name`, `description`) to the `tools` array in `src/app/tools.ts` — the sidebar nav (`layout.tsx`) and the home page card grid (`page.tsx`) are both generated from it
-  3. add `src/app/<tool-name>/layout.tsx` that exports `metadata = toolMetadata("/<tool-name>")` (pages are client components, so they cannot export `metadata` themselves; the root layout applies the `%s | デベロッパーツール` title template)
+  2. add an entry (`href`, `name`, `description`) to the `tools` array in `src/app/tools.ts` — the sidebar nav (`layout.tsx`), the home page card grid (`page.tsx`), and `sitemap.xml` (`sitemap.ts`) are all generated from it
+  3. add `src/app/<tool-name>/layout.tsx` that exports `metadata = toolMetadata("/<tool-name>")` (title, description, canonical, OGP/Twitter card) and renders `<JsonLd data={toolJsonLd("/<tool-name>")} />` before `children` (copy an existing tool's layout). Pages are client components, so they cannot export `metadata` themselves; the root layout applies the `%s | デベロッパーツール` title template)
+
+- **SEO**: the site is a static export (`output: "export"` in `next.config.ts`), so `sitemap.ts` / `robots.ts` declare `dynamic = "force-static"`. `metadataBase` is set in the root layout from `SITE_URL` in `tools.ts`. A child `openGraph` replaces the parent's instead of merging, so `toolMetadata` repeats the shared fields including `images: [OG_IMAGE]` (`public/og.png`, a static PNG with an extension so static hosts serve the right Content-Type).
+
+- **Analytics**: GA4 via `@next/third-parties` `GoogleAnalytics` in the root layout, rendered only when `NEXT_PUBLIC_GA_ID` is set. The ID lives in the committed `.env.production` (un-ignored in `.gitignore`), so only `next build` output includes the tag and `npm run dev` traffic is not tracked.
   Each tool page is a self-contained client component (`"use client"`) with its own local `useState`-based logic — there is no shared state, API layer, or data-fetching between tools.
 
 - **Layout**: `src/app/layout.tsx` renders a 200px left sidebar (collapsing to a top nav at ≤768px) plus the single `<main>` content area. This is the single place shared chrome lives; tool pages must not render their own `<main>` (use `<div className="main">`) and should use `<h1 className="title">` for the page heading.

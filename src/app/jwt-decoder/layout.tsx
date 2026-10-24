@@ -1,4 +1,5 @@
-import { toolMetadata } from "../tools";
+import JsonLd from "../JsonLd";
+import { toolJsonLd, toolMetadata } from "../tools";
 
 export const metadata = toolMetadata("/jwt-decoder");
 
@@ -7,5 +8,10 @@ export default function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("/jwt-decoder")} />
+      {children}
+    </>
+  );
 }
