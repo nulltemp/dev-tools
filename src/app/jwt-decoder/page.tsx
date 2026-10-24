@@ -1,58 +1,36 @@
 "use client";
 import React, { useState } from "react";
+import { decodeJwt } from "./decodeJwt";
 
-interface DecodedJwt {
+interface DecodedView {
   header: string;
   payload: string;
   signature: string;
   expiredMessage: string | null;
 }
 
-const base64UrlDecode = (segment: string): string => {
-  const base64 = segment.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = base64.padEnd(
-    base64.length + ((4 - (base64.length % 4)) % 4),
-    "="
-  );
-  const binary = atob(padded);
-  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-  return new TextDecoder("utf-8").decode(bytes);
-};
-
 const JwtDecoder: React.FC = () => {
   const [input, setInput] = useState("");
-  const [decoded, setDecoded] = useState<DecodedJwt | null>(null);
+  const [decoded, setDecoded] = useState<DecodedView | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleDecode = () => {
-    const parts = input.trim().split(".");
-    if (parts.length !== 3) {
+    const result = decodeJwt(input);
+    if (!result.ok) {
       setDecoded(null);
-      setError("無効なJWT形式です(header.payload.signatureの3部構成である必要があります)");
+      setError(result.error);
       return;
     }
 
-    try {
-      const header = JSON.stringify(JSON.parse(base64UrlDecode(parts[0])), null, 2);
-      const payloadObj = JSON.parse(base64UrlDecode(parts[1]));
-      const payload = JSON.stringify(payloadObj, null, 2);
-
-      let expiredMessage: string | null = null;
-      if (typeof payloadObj.exp === "number") {
-        const expDate = new Date(payloadObj.exp * 1000);
-        const isExpired = expDate.getTime() < Date.now();
-        expiredMessage = `有効期限(exp): ${expDate.toLocaleString("ja-JP")}${
+    const { header, payload, signature, expiresAt, isExpired } = result.decoded;
+    const expiredMessage = expiresAt
+      ? `有効期限(exp): ${expiresAt.toLocaleString("ja-JP")}${
           isExpired ? "(期限切れ)" : ""
-        }`;
-      }
+        }`
+      : null;
 
-      setDecoded({ header, payload, signature: parts[2], expiredMessage });
-      setError(null);
-    } catch (e: unknown) {
-      console.error(e);
-      setDecoded(null);
-      setError("JWTのデコードに失敗しました");
-    }
+    setDecoded({ header, payload, signature, expiredMessage });
+    setError(null);
   };
 
   return (

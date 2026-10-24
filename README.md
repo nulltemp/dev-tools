@@ -20,9 +20,10 @@ npm run dev      # 開発サーバー起動 (Next.js + Turbopack) http://localho
 npm run build    # 本番ビルド
 npm run start    # 本番ビルドの起動
 npm run lint     # ESLint (eslint .)
+npm test         # テスト実行 (Vitest)
 ```
 
-テストスイートは未設定です。
+テストは Vitest で、各ツールのロジック（`src/app/<tool-name>/*.ts`）の隣に `*.test.ts` として置いています。
 
 ## ツールの追加方法
 

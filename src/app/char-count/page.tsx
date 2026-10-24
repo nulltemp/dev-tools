@@ -1,11 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-
-// 絵文字や結合文字を1文字として数えるため、書記素単位で分割する
-const segmenter = new Intl.Segmenter("ja", { granularity: "grapheme" });
-
-const countGraphemes = (text: string): number =>
-  Array.from(segmenter.segment(text)).length;
+import { countGraphemes } from "./countChars";
 
 export default function CharCounterPage() {
   const [text, setText] = useState("");

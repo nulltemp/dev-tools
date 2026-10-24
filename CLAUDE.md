@@ -9,9 +9,12 @@ npm run dev      # start dev server (Next.js + Turbopack) at http://localhost:30
 npm run build    # production build
 npm run start    # run production build
 npm run lint     # eslint . (flat config: eslint-config-next core-web-vitals + typescript)
+npm test         # run unit tests once (Vitest)
+npm run test:watch  # Vitest in watch mode
+npx vitest run src/app/jwt-decoder  # run tests under one path
 ```
 
-There is no test suite configured in this project. Package manager is npm (package-lock.json is present).
+Tests use Vitest (`vitest.config.mts`, node environment) and live next to the code as `src/**/*.test.ts`. Tool pages keep UI only; pure logic is extracted into a sibling module (e.g. `jwt-decoder/decodeJwt.ts`) and unit-tested there — follow this for new tools. Package manager is npm (package-lock.json is present).
 
 ## Architecture
 
