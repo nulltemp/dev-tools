@@ -33,7 +33,7 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-            <div style={{ display: "flex" }}>
+            <div className="app-shell">
               <aside className="sidebar">
                 <h3>ツール</h3>
                 <nav>
@@ -50,7 +50,7 @@ export default function RootLayout({
                   </ul>
                 </nav>
               </aside>
-              <main style={{ flex: 1, padding: "2rem", marginLeft: "200px" }}>
+              <main className="app-content">
                 {children}
               </main>
             </div>
