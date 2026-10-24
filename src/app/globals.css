@@ -93,6 +93,34 @@ input:focus, textarea:focus {
   border-color: var(--primary);
 }
 
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100vh;
+  padding: 1rem;
+  background: var(--background);
+  color: var(--foreground);
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-nav {
+  list-style: none;
+}
+
+.sidebar-nav li:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-nav a {
+  color: var(--foreground);
+}
+
+.sidebar-nav a:hover {
+  color: var(--primary);
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

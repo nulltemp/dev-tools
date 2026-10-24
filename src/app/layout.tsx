@@ -34,53 +34,18 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             <div style={{ display: "flex" }}>
-              <aside
-                style={{
-                  width: "200px",
-                  backgroundColor: "#fff",
-                  padding: "1rem",
-                  borderRight: `1px solid #e0e0e0`,
-                  position: "fixed",
-                  height: "100vh",
-                  top: 0,
-                  left: 0,
-                }}
-              >
+              <aside className="sidebar">
                 <h3>ツール</h3>
                 <nav>
-                  <ul style={{ listStyle: "none", padding: 0 }}>
-                    <li style={{ marginBottom: "0.5rem" }}>
-                      <Link
-                        href="/char-count"
-                        style={{
-                          textDecoration: "none",
-                          color: "#000",
-                        }}
-                      >
-                        文字数カウンター
-                      </Link>
-                    </li>
-                    <li style={{ marginBottom: "0.5rem" }}>
-                      <Link
-                        href="/json-formatter"
-                        style={{
-                          textDecoration: "none",
-                          color: "#000",
-                        }}
-                      >
-                        JSON整形
-                      </Link>
+                  <ul className="sidebar-nav">
+                    <li>
+                      <Link href="/char-count">文字数カウンター</Link>
                     </li>
                     <li>
-                      <Link
-                        href="/jwt-decoder"
-                        style={{
-                          textDecoration: "none",
-                          color: "#000",
-                        }}
-                      >
-                        JWTデコーダー
-                      </Link>
+                      <Link href="/json-formatter">JSON整形</Link>
+                    </li>
+                    <li>
+                      <Link href="/jwt-decoder">JWTデコーダー</Link>
                     </li>
                   </ul>
                 </nav>
