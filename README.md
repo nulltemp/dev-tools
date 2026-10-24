@@ -8,6 +8,7 @@ https://dev-tools.nulltemp.com
 
 - 文字数カウンター (`/char-count`) — テキストの文字数をカウントします
 - JSON整形 (`/json-formatter`) — JSONデータを整形して表示します
+- JWTデコーダー (`/jwt-decoder`) — JWTのヘッダーとペイロードをデコードして表示します（署名の検証は行いません）
 
 ## Getting Started
 

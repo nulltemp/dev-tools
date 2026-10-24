@@ -15,7 +15,7 @@ There is no test suite configured in this project. Package manager is npm (packa
 
 ## Architecture
 
-This is a Next.js (App Router) collection of small, independent developer utility tools ("デベロッパーツール"), deployed at https://dev-tools-lovat.vercel.app/. Currently available tools: 文字数カウンター (`src/app/char-count`) and JSON整形 (`src/app/json-formatter`).
+This is a Next.js (App Router) collection of small, independent developer utility tools ("デベロッパーツール"), deployed at https://dev-tools.nulltemp.com. Currently available tools: 文字数カウンター (`src/app/char-count`), JSON整形 (`src/app/json-formatter`), and JWTデコーダー (`src/app/jwt-decoder`).
 
 - **Adding a new tool**: create a new route directory under `src/app/<tool-name>/page.tsx`, then add a link/card for it in two places:
   - the sidebar nav in `src/app/layout.tsx` (the `<nav>` list)
