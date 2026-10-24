@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev      # start dev server (Next.js + Turbopack) at http://localhost:3000
 npm run build    # production build
 npm run start    # run production build
-npm run lint     # next lint (flat config: next/core-web-vitals + next/typescript)
+npm run lint     # eslint . (flat config: eslint-config-next core-web-vitals + typescript)
 ```
 
 There is no test suite configured in this project. Package manager is npm (package-lock.json is present).

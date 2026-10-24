@@ -18,7 +18,7 @@ npm install
 npm run dev      # 開発サーバー起動 (Next.js + Turbopack) http://localhost:3000
 npm run build    # 本番ビルド
 npm run start    # 本番ビルドの起動
-npm run lint     # next lint
+npm run lint     # ESLint (eslint .)
 ```
 
 テストスイートは未設定です。
