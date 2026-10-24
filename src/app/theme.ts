@@ -5,7 +5,7 @@ const theme = createTheme({
   cssVariables: true,
   colorSchemes: { light: true, dark: true },
   typography: {
-    fontFamily: 'var(--font-roboto)',
+    fontFamily: 'var(--font-sans)',
   },
 });
 

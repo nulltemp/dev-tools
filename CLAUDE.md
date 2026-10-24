@@ -29,7 +29,7 @@ This is a Next.js (App Router) collection of small, independent developer utilit
   - Plain CSS utility classes (`.container`, `.main`, `.title`, `.cards`, `.card`, `.input-section`, `.input-field`, `.button-section`, `.error-message`, etc.) are defined globally in `src/app/globals.css` and reused across tool pages instead of per-page CSS modules. Reuse these existing classes for new tool pages rather than introducing new ad hoc styles, unless MUI components cover the need.
   - Theming uses CSS custom properties (`--primary`, `--background`, `--foreground`, etc.) in `globals.css` with a `prefers-color-scheme: dark` override block.
 
-- **Fonts**: Roboto is loaded both via `next/font/google` (as a CSS variable `--font-roboto`, applied to `<html>`) and via `@fontsource/roboto` static imports in `layout.tsx`.
+- **Fonts**: Roboto is loaded only via `next/font/google` (CSS variable `--font-roboto`, applied to `<html>`). `globals.css` defines `--font-sans` (Roboto + Japanese system font fallbacks, used by `body` and the MUI theme) and `--font-mono` (used by `.input-field` and `.formatted-json`).
 
 - **Language**: UI copy is in Japanese.
 
