@@ -57,8 +57,8 @@ const JwtDecoder: React.FC = () => {
 
   return (
     <div className="container">
-      <main className="main">
-        <h2 className="title">JWTデコーダー</h2>
+      <div className="main">
+        <h1 className="title">JWTデコーダー</h1>
         <div className="input-section">
           <textarea
             rows={6}
@@ -73,14 +73,14 @@ const JwtDecoder: React.FC = () => {
           {error && <div className="error-message">{error}</div>}
           {decoded && (
             <>
-              <h3>ヘッダー</h3>
+              <h2 className="section-title">ヘッダー</h2>
               <pre className="formatted-json">{decoded.header}</pre>
-              <h3>ペイロード</h3>
+              <h2 className="section-title">ペイロード</h2>
               <pre className="formatted-json">{decoded.payload}</pre>
               {decoded.expiredMessage && (
                 <p className="char-count">{decoded.expiredMessage}</p>
               )}
-              <h3>署名</h3>
+              <h2 className="section-title">署名</h2>
               <pre className="formatted-json">{decoded.signature}</pre>
               <p className="char-count">
                 ※署名の検証は行っていません(デコードのみ)
@@ -88,7 +88,7 @@ const JwtDecoder: React.FC = () => {
             </>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 };

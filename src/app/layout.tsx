@@ -29,13 +29,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={roboto.variable}>
+    <html lang="ja" className={roboto.variable}>
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             <div className="app-shell">
               <aside className="sidebar">
-                <h3>ツール</h3>
+                <h2 className="sidebar-title">ツール</h2>
                 <nav>
                   <ul className="sidebar-nav">
                     <li>

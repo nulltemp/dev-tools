@@ -20,8 +20,8 @@ const JsonFormatter: React.FC = () => {
 
   return (
     <div className="container">
-      <main className="main">
-        <h2 className="title">JSON整形ツール</h2>
+      <div className="main">
+        <h1 className="title">JSON整形ツール</h1>
         <div className="input-section">
           <textarea
             rows={10}
@@ -36,7 +36,7 @@ const JsonFormatter: React.FC = () => {
           {error && <div className="error-message">{error}</div>}
           {formatted && <pre className="formatted-json">{formatted}</pre>}
         </div>
-      </main>
+      </div>
     </div>
   );
 };

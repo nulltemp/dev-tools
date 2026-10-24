@@ -116,6 +116,11 @@ input:focus, textarea:focus {
   border-right: 1px solid var(--border);
 }
 
+.sidebar-title,
+.section-title {
+  font-size: 1.17rem;
+}
+
 .sidebar-nav {
   list-style: none;
 }
@@ -171,7 +176,7 @@ input:focus, textarea:focus {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.card-content h3 {
+.card-content h2 {
   color: var(--primary);
   margin-bottom: 8px;
   font-size: 1.25rem;

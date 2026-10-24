@@ -13,7 +13,7 @@ export default function CharCounterPage() {
 
   return (
     <div className="container">
-      <main className="main">
+      <div className="main">
         <h1 className="title">文字数カウンター</h1>
         <div className="input-section">
           <textarea
@@ -25,7 +25,7 @@ export default function CharCounterPage() {
           />
           <p className="char-count">文字数: {charCount}</p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
