@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 export const SITE_URL = "https://dev-tools.nulltemp.com";
 export const SITE_NAME = "デベロッパーツール";
+export const PRIVACY_POLICY_URL = "https://nulltemp.com/privacy/";
 export const SITE_DESCRIPTION =
   "文字数カウンター、JSON整形、JWTデコーダーなど、開発に便利なツール集";
 

@@ -122,6 +122,8 @@ input:focus, textarea:focus {
   background: var(--background);
   color: var(--foreground);
   border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-title,
@@ -143,6 +145,21 @@ input:focus, textarea:focus {
 
 .sidebar-nav a:hover {
   color: var(--primary);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  font-size: 0.8rem;
+}
+
+.sidebar-footer a {
+  color: var(--foreground);
+  opacity: 0.7;
+}
+
+.sidebar-footer a:hover {
+  color: var(--primary);
+  opacity: 1;
 }
 
 .container {
@@ -264,6 +281,10 @@ input:focus, textarea:focus {
 
   .sidebar-nav li:not(:last-child) {
     margin-bottom: 0;
+  }
+
+  .sidebar-footer {
+    margin-top: 0.75rem;
   }
 
   .container {

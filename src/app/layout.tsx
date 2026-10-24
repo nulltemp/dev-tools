@@ -7,6 +7,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
 import {
   OG_IMAGE,
+  PRIVACY_POLICY_URL,
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_URL,
@@ -67,6 +68,9 @@ export default function RootLayout({
                     ))}
                   </ul>
                 </nav>
+                <footer className="sidebar-footer">
+                  <a href={PRIVACY_POLICY_URL}>プライバシーポリシー</a>
+                </footer>
               </aside>
               <main className="app-content">
                 {children}
