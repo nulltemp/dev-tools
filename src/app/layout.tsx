@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { Roboto } from "next/font/google";
+import Link from "next/link";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
 import "./globals.css";
@@ -49,7 +50,7 @@ export default function RootLayout({
                 <nav>
                   <ul style={{ listStyle: "none", padding: 0 }}>
                     <li style={{ marginBottom: "0.5rem" }}>
-                      <a
+                      <Link
                         href="/char-count"
                         style={{
                           textDecoration: "none",
@@ -57,10 +58,10 @@ export default function RootLayout({
                         }}
                       >
                         文字数カウンター
-                      </a>
+                      </Link>
                     </li>
                     <li style={{ marginBottom: "0.5rem" }}>
-                      <a
+                      <Link
                         href="/json-formatter"
                         style={{
                           textDecoration: "none",
@@ -68,10 +69,10 @@ export default function RootLayout({
                         }}
                       >
                         JSON整形
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a
+                      <Link
                         href="/jwt-decoder"
                         style={{
                           textDecoration: "none",
@@ -79,7 +80,7 @@ export default function RootLayout({
                         }}
                       >
                         JWTデコーダー
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </nav>
