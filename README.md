@@ -27,8 +27,8 @@ npm run lint     # ESLint (eslint .)
 ## ツールの追加方法
 
 1. `src/app/<tool-name>/page.tsx` に新しいルートを作成する
-2. `src/app/layout.tsx` のサイドバーナビにリンクを追加する
-3. `src/app/page.tsx` のホームページのカード一覧にリンクを追加する
+2. `src/app/tools.ts` の `tools` 配列にツール（`href`・`name`・`description`）を追加する（サイドバーとホームのカードはここから自動生成されます）
+3. `src/app/<tool-name>/layout.tsx` を作成し、`export const metadata = toolMetadata("/<tool-name>");` でページのタイトルを設定する
 
 各ツールページは `"use client"` の自己完結したコンポーネントで、独自の `useState` ベースのロジックのみを持ちます（ツール間の共有状態・APIレイヤー・データフェッチはありません）。
 
