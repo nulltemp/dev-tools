@@ -36,3 +36,5 @@ npm test         # テスト実行 (Vitest)
 スタイリングは MUI (Material UI) と `src/app/globals.css` のユーティリティクラス（`.container`, `.cards`, `.card`, `.input-section` など）を併用しています。既存のクラスがあれば新規CSSを追加せず再利用してください。
 
 詳細なアーキテクチャ方針は [CLAUDE.md](./CLAUDE.md) を参照してください。
+
+未対応の改善点は [docs/TODO.md](./docs/TODO.md) にまとめています。
