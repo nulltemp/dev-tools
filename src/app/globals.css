@@ -124,6 +124,8 @@ input:focus, textarea:focus {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+  /* ツールが増えて画面に収まらなくなってもスクロールで辿れるようにする */
+  overflow-y: auto;
 }
 
 .sidebar-title,
