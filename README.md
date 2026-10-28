@@ -18,7 +18,7 @@ https://dev-tools.nulltemp.com
 npm install
 npm run dev      # 開発サーバー起動 (Next.js + Turbopack) http://localhost:3000
 npm run build    # 本番ビルド
-npm run start    # 本番ビルドの起動
+npm run start    # 本番ビルド (out/) を http://localhost:4173 で配信
 npm run lint     # ESLint (eslint .)
 npm test         # テスト実行 (Vitest)
 ```
@@ -36,3 +36,5 @@ npm test         # テスト実行 (Vitest)
 スタイリングは MUI (Material UI) と `src/app/globals.css` のユーティリティクラス（`.container`, `.cards`, `.card`, `.input-section` など）を併用しています。既存のクラスがあれば新規CSSを追加せず再利用してください。
 
 詳細なアーキテクチャ方針は [CLAUDE.md](./CLAUDE.md) を参照してください。
+
+未対応の改善点は [docs/TODO.md](./docs/TODO.md) にまとめています。

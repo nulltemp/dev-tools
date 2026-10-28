@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev      # start dev server (Next.js + Turbopack) at http://localhost:3000
 npm run build    # production build
-npm run start    # run production build
+npm run start    # serve the static export (out/) at http://localhost:4173 via vite preview
 npm run lint     # eslint . (flat config: eslint-config-next core-web-vitals + typescript)
 npm test         # run unit tests once (Vitest)
 npm run test:watch  # Vitest in watch mode
