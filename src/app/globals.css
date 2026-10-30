@@ -3,7 +3,9 @@
   --foreground: #171717;
   --primary: #1976d2;
   --primary-hover: #1565c0;
-  --secondary: #6c757d;
+  --button-bg: #1976d2;
+  --button-bg-hover: #1565c0;
+  --secondary: #5c636a;
   --success: #28a745;
   --warning: #ffc107;
   --error: #dc3545;
@@ -24,6 +26,9 @@
     --foreground: #ededed;
     --primary: #2196f3;
     --primary-hover: #1976d2;
+    /* --primary のままだと白文字とのコントラストが足りないため、ボタンだけ濃い色にする */
+    --button-bg: #1976d2;
+    --button-bg-hover: #1565c0;
     --secondary: #adb5bd;
     --success: #20c997;
     --warning: #ffd43b;
@@ -74,7 +79,7 @@ textarea {
 }
 
 button {
-  background: var(--primary);
+  background: var(--button-bg);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -85,7 +90,7 @@ button {
 }
 
 button:hover {
-  background: var(--primary-hover);
+  background: var(--button-bg-hover);
 }
 
 input, textarea {
@@ -97,7 +102,8 @@ input, textarea {
 }
 
 input:focus, textarea:focus {
-  outline: none;
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
   border-color: var(--primary);
 }
 
@@ -141,10 +147,12 @@ input:focus, textarea:focus {
   margin-bottom: 0.5rem;
 }
 
+.sidebar-title a,
 .sidebar-nav a {
   color: var(--foreground);
 }
 
+.sidebar-title a:hover,
 .sidebar-nav a:hover {
   color: var(--primary);
 }

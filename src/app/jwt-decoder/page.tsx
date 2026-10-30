@@ -60,7 +60,11 @@ const JwtDecoder: React.FC = () => {
           <div className="button-section">
             <button onClick={handleDecode}>デコード</button>
           </div>
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="error-message" role="alert">
+              {error}
+            </div>
+          )}
           {decoded && (
             <>
               <div className="result-header">

@@ -40,7 +40,11 @@ const JsonFormatter: React.FC = () => {
           <div className="button-section">
             <button onClick={handleFormat}>整形</button>
           </div>
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="error-message" role="alert">
+              {error}
+            </div>
+          )}
           {formatted && (
             <>
               <div className="result-header">

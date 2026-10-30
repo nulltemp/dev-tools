@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
+import Link from "next/link";
 import { Roboto } from "next/font/google";
 import { ThemeProvider } from "@mui/material/styles";
 import SidebarNav from "./SidebarNav";
@@ -57,7 +58,9 @@ export default function RootLayout({
           <ThemeProvider theme={theme}>
             <div className="app-shell">
               <aside className="sidebar">
-                <h2 className="sidebar-title">ツール</h2>
+                <h2 className="sidebar-title">
+                  <Link href="/">ツール</Link>
+                </h2>
                 <SidebarNav />
                 <footer className="sidebar-footer">
                   <a href={PRIVACY_POLICY_URL}>プライバシーポリシー</a>
