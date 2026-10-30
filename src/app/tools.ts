@@ -39,7 +39,7 @@ export const tools: Tool[] = [
   },
 ];
 
-const findTool = (href: string): Tool => {
+export const findTool = (href: string): Tool => {
   const tool = tools.find((t) => t.href === href);
   if (!tool) {
     throw new Error(`Unknown tool: ${href}`);

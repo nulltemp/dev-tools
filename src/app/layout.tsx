@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { Roboto } from "next/font/google";
-import Link from "next/link";
 import { ThemeProvider } from "@mui/material/styles";
+import SidebarNav from "./SidebarNav";
 import theme from "./theme";
 import {
   OG_IMAGE,
@@ -11,7 +11,6 @@ import {
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_URL,
-  tools,
 } from "./tools";
 import "./globals.css";
 
@@ -59,15 +58,7 @@ export default function RootLayout({
             <div className="app-shell">
               <aside className="sidebar">
                 <h2 className="sidebar-title">ツール</h2>
-                <nav>
-                  <ul className="sidebar-nav">
-                    {tools.map((tool) => (
-                      <li key={tool.href}>
-                        <Link href={tool.href}>{tool.name}</Link>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
+                <SidebarNav />
                 <footer className="sidebar-footer">
                   <a href={PRIVACY_POLICY_URL}>プライバシーポリシー</a>
                 </footer>
