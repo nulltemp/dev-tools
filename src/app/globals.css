@@ -165,6 +165,9 @@ input:focus, textarea:focus {
 .sidebar-footer {
   margin-top: auto;
   font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .sidebar-footer a {
