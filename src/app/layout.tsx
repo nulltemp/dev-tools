@@ -7,6 +7,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import SidebarNav from "./SidebarNav";
 import theme from "./theme";
 import {
+  KOFI_URL,
   OG_IMAGE,
   PRIVACY_POLICY_URL,
   SITE_DESCRIPTION,
@@ -63,6 +64,9 @@ export default function RootLayout({
                 </h2>
                 <SidebarNav />
                 <footer className="sidebar-footer">
+                  <a href={KOFI_URL} target="_blank" rel="noopener">
+                    Ko-fiで支援する
+                  </a>
                   <a href={PRIVACY_POLICY_URL}>プライバシーポリシー</a>
                 </footer>
               </aside>
