@@ -261,6 +261,11 @@ input:focus, textarea:focus {
   font-weight: 500;
 }
 
+.not-found-message {
+  color: var(--secondary);
+  margin-bottom: 24px;
+}
+
 /* 結果に添える補足(有効期限など) */
 .note {
   color: var(--secondary);

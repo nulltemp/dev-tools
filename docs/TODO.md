@@ -22,22 +22,10 @@
 
 DOM の並びで、サイドバーの `<h2 className="sidebar-title">ツール</h2>` が各ページの `<h1>` より前に来る。
 
-### JSON整形のエラーで場所がわからない
-
-`formatJson.ts` はエラーメッセージを「無効なJSONです」に固定しているため、どこが間違っているか分からない。
-
-- 対応案: `JSON.parse` が投げるエラーのメッセージ（何文字目か）を表示する。
-
 ### 細かい CSS の調整
 
 - `.card:hover` のアニメーションが `prefers-reduced-motion`（動きを減らす設定）を考慮していない。
 - `.card:hover` の影の色がハードコードされていて、ダークモード用の変数（`--card-shadow` など）を使っていない。
-
-### 404ページが英語のまま
-
-`out/404.html` のタイトルと本文が Next.js 既定の「This page could not be found」になっている。
-
-- 対応案: `src/app/not-found.tsx` を追加し、日本語の案内とホームへのリンクを置く。
 
 ### JSON整形の表示幅が狭い
 
