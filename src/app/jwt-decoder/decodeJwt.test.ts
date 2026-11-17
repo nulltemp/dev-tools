@@ -64,6 +64,24 @@ describe("decodeJwt", () => {
     expect(result.ok && result.decoded.isExpired).toBe(true);
   });
 
+  it("expが現在時刻ちょうどなら期限切れ(RFC 7519)", () => {
+    const result = decodeJwt(makeJwt({ exp: nowSec }), NOW);
+    expect(result.ok && result.decoded.expiresAt).toEqual(new Date(NOW));
+    expect(result.ok && result.decoded.isExpired).toBe(true);
+  });
+
+  it.each([
+    ["極端に大きい", "1e20", false],
+    ["Infinityになるほど大きい", "1e400", false],
+    ["極端に小さい", "-1e20", true],
+  ])("expが%s値ならInvalid Dateにせず、期限切れかどうかは判定する", (_, exp, expired) => {
+    // JSON.stringify では 1e400 を表せないので、ペイロードを直接組み立てる
+    const payload = Buffer.from(`{"exp":${exp}}`).toString("base64url");
+    const result = decodeJwt(`${encode({ alg: "HS256" })}.${payload}.sig`, NOW);
+    expect(result.ok && result.decoded.expiresAt).toBeNull();
+    expect(result.ok && result.decoded.isExpired).toBe(expired);
+  });
+
   it("expが数値でなければ有効期限なしとして扱う", () => {
     const result = decodeJwt(makeJwt({ exp: "1700000000" }), NOW);
     expect(result.ok && result.decoded.expiresAt).toBeNull();

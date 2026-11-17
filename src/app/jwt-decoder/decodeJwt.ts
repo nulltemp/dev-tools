@@ -44,8 +44,15 @@ export const decodeJwt = (
       typeof payloadObj === "object" && payloadObj !== null
         ? (payloadObj as { exp?: unknown }).exp
         : undefined;
-    const expiresAt = typeof exp === "number" ? new Date(exp * 1000) : null;
-    const isExpired = expiresAt !== null && expiresAt.getTime() < now;
+    const expMs = typeof exp === "number" ? exp * 1000 : null;
+    // RFC 7519: exp の時刻ちょうども期限切れ。
+    // Date で表せないほど大きい値でも判定できるよう、数値のまま比較する
+    const isExpired = expMs !== null && expMs <= now;
+    // Date の範囲外(±8.64e15ミリ秒を超える)だと Invalid Date になるので表示しない
+    const expiresAt =
+      expMs !== null && Number.isFinite(new Date(expMs).getTime())
+        ? new Date(expMs)
+        : null;
 
     return {
       ok: true,
