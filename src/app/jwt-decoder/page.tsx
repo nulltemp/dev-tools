@@ -2,16 +2,54 @@
 import React, { useState } from "react";
 import CopyButton from "../CopyButton";
 import { findTool } from "../tools";
-import { decodeJwt } from "./decodeJwt";
+import { decodeJwt, type DecodedJwt } from "./decodeJwt";
 
 const { name } = findTool("/jwt-decoder");
+
+interface TimeNote {
+  label: string;
+  text: string;
+  alert: boolean;
+}
 
 interface DecodedView {
   header: string;
   payload: string;
   signature: string;
-  expiredMessage: string | null;
+  timeNotes: TimeNote[];
 }
+
+const formatDate = (date: Date) => date.toLocaleString("ja-JP");
+
+const toTimeNotes = (decoded: DecodedJwt): TimeNote[] => {
+  const notes: TimeNote[] = [];
+  if (decoded.issuedAt) {
+    notes.push({
+      label: "発行日時(iat)",
+      text: formatDate(decoded.issuedAt),
+      alert: false,
+    });
+  }
+  if (decoded.notBefore) {
+    notes.push({
+      label: "有効開始(nbf)",
+      text: `${formatDate(decoded.notBefore)}${
+        decoded.isNotYetValid ? "(まだ有効ではありません)" : ""
+      }`,
+      alert: decoded.isNotYetValid,
+    });
+  }
+  if (decoded.expiresAt) {
+    notes.push({
+      label: "有効期限(exp)",
+      text: `${formatDate(decoded.expiresAt)}${
+        decoded.isExpired ? "(期限切れ)" : ""
+      }`,
+      alert: decoded.isExpired,
+    });
+  }
+  return notes;
+};
 
 const JwtDecoder: React.FC = () => {
   const [input, setInput] = useState("");
@@ -26,14 +64,13 @@ const JwtDecoder: React.FC = () => {
       return;
     }
 
-    const { header, payload, signature, expiresAt, isExpired } = result.decoded;
-    const expiredMessage = expiresAt
-      ? `有効期限(exp): ${expiresAt.toLocaleString("ja-JP")}${
-          isExpired ? "(期限切れ)" : ""
-        }`
-      : null;
-
-    setDecoded({ header, payload, signature, expiredMessage });
+    const { header, payload, signature } = result.decoded;
+    setDecoded({
+      header,
+      payload,
+      signature,
+      timeNotes: toTimeNotes(result.decoded),
+    });
     setError(null);
   };
 
@@ -49,6 +86,10 @@ const JwtDecoder: React.FC = () => {
       <div className="main">
         <h1 className="title">{name}</h1>
         <div className="input-section">
+          <p className="note">
+            入力したJWTはブラウザ内でデコードされ、どこにも送信されません。
+            {"「Bearer 」付きのまま貼り付けても読み取れます。"}
+          </p>
           <textarea
             rows={6}
             className="input-field"
@@ -77,15 +118,20 @@ const JwtDecoder: React.FC = () => {
                 <CopyButton text={decoded.payload} label="ペイロードをコピー" />
               </div>
               <pre className="formatted-json">{decoded.payload}</pre>
-              {decoded.expiredMessage && (
-                <p className="char-count">{decoded.expiredMessage}</p>
-              )}
+              {decoded.timeNotes.map((note) => (
+                <p
+                  key={note.label}
+                  className={note.alert ? "note note-alert" : "note"}
+                >
+                  {note.label}: {note.text}
+                </p>
+              ))}
               <div className="result-header">
                 <h2 className="section-title">署名</h2>
                 <CopyButton text={decoded.signature} label="署名をコピー" />
               </div>
               <pre className="formatted-json">{decoded.signature}</pre>
-              <p className="char-count">
+              <p className="note">
                 ※署名の検証は行っていません(デコードのみ)
               </p>
             </>

@@ -82,11 +82,14 @@ describe("formatJson", () => {
   });
 
   it.each([
-    ["空文字", ""],
-    ["末尾カンマ", '{"a":1,}'],
-    ["シングルクォート", "{'a':1}"],
-    ["閉じ括弧なし", '{"a":1'],
-  ])("無効なJSON(%s)はエラーを返す", (_, input) => {
-    expect(formatJson(input)).toEqual({ ok: false, error: "無効なJSONです" });
+    ["空文字", "", "1行目 1文字目): JSONが入力されていません"],
+    ["末尾カンマ", '{"a":1,}', "1行目 7文字目): 最後の要素の後ろに余分なカンマがあります"],
+    ["シングルクォート", "{'a':1}", "1行目 2文字目): 文字列はダブルクォート"],
+    ["閉じ括弧なし", '{"a":1', "1行目 7文字目): JSONが途中で終わっています"],
+    ["2行目のエラー", '{\n  "a": tru\n}', "2行目 8文字目): 「true」の綴りが正しくありません"],
+  ])("無効なJSON(%s)はエラーの位置と理由を返す", (_, input, expected) => {
+    const result = formatJson(input);
+    expect(result.ok).toBe(false);
+    expect(!result.ok && result.error).toContain(`無効なJSONです(${expected}`);
   });
 });

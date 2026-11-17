@@ -1,3 +1,5 @@
+import { findJsonError } from "./findJsonError";
+
 export type FormatJsonResult =
   | { ok: true; formatted: string }
   | { ok: false; error: string };
@@ -57,7 +59,14 @@ export const formatJson = (input: string): FormatJsonResult => {
   try {
     JSON.parse(input);
   } catch {
-    return { ok: false, error: "無効なJSONです" };
+    const location = findJsonError(input);
+    return {
+      ok: false,
+      // JSON.parse と判定が食い違った場合に備え、位置が分からなくてもエラーは返す
+      error: location
+        ? `無効なJSONです(${location.line}行目 ${location.column}文字目): ${location.message}`
+        : "無効なJSONです",
+    };
   }
   return { ok: true, formatted: reindent(input) };
 };

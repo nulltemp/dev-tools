@@ -93,7 +93,7 @@ button:hover {
   background: var(--button-bg-hover);
 }
 
-input, textarea {
+input, textarea, select {
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 8px 12px;
@@ -101,7 +101,7 @@ input, textarea {
   transition: border-color 0.2s;
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus {
   outline: 2px solid var(--primary);
   outline-offset: -1px;
   border-color: var(--primary);
@@ -258,6 +258,79 @@ input:focus, textarea:focus {
 .char-count {
   color: var(--secondary);
   font-size: 18px;
+  font-weight: 500;
+}
+
+.not-found-message {
+  color: var(--secondary);
+  margin-bottom: 24px;
+}
+
+/* 1ページに入出力のまとまりが複数あるときの見出し */
+.tool-section-title {
+  margin: 32px 0 12px;
+}
+
+/* 1行の入力欄と、その横に並べる選択肢・ボタン */
+.input-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.input-row input {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.input-mono {
+  font-family: var(--font-mono);
+}
+
+/* 項目名・値・コピーボタンを並べる変換結果 */
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.result-table th,
+.result-table td {
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.result-table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--secondary);
+  white-space: nowrap;
+}
+
+.result-value {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.result-copy {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* 結果に添える補足(有効期限など) */
+.note {
+  color: var(--secondary);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+/* 期限切れなど、注意が必要な補足 */
+.note-alert {
+  color: var(--error);
   font-weight: 500;
 }
 
