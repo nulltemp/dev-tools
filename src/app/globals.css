@@ -261,6 +261,19 @@ input:focus, textarea:focus {
   font-weight: 500;
 }
 
+/* 結果に添える補足(有効期限など) */
+.note {
+  color: var(--secondary);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+/* 期限切れなど、注意が必要な補足 */
+.note-alert {
+  color: var(--error);
+  font-weight: 500;
+}
+
 .result-header {
   display: flex;
   align-items: center;

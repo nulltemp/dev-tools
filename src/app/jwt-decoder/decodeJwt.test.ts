@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { base64UrlDecode, decodeJwt } from "./decodeJwt";
+import {
+  DECODE_ERROR,
+  FORMAT_ERROR,
+  JWE_ERROR,
+  base64UrlDecode,
+  decodeJwt,
+  normalizeToken,
+} from "./decodeJwt";
 
 const encode = (value: unknown): string =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -32,6 +39,16 @@ describe("base64UrlDecode", () => {
   });
 });
 
+describe("normalizeToken", () => {
+  it("トークンの途中にあるBearerは取り除かない", () => {
+    expect(normalizeToken("abc.Bearer x.def")).toBe("abc.Bearer x.def");
+  });
+
+  it("Bearerだけの入力は空文字になる", () => {
+    expect(normalizeToken("Bearer ")).toBe("");
+  });
+});
+
 describe("decodeJwt", () => {
   it("ヘッダーとペイロードを整形したJSONで返し、署名はそのまま返す", () => {
     const result = decodeJwt(makeJwt({ sub: "123", name: "太郎" }), NOW);
@@ -42,7 +59,10 @@ describe("decodeJwt", () => {
         payload: '{\n  "sub": "123",\n  "name": "太郎"\n}',
         signature: "signature-part",
         expiresAt: null,
+        notBefore: null,
+        issuedAt: null,
         isExpired: false,
+        isNotYetValid: false,
       },
     });
   });
@@ -101,20 +121,48 @@ describe("decodeJwt", () => {
     ["4部構成", "a.b.c.d"],
     ["空文字", ""],
   ])("%sのトークンは形式エラーを返す", (_, input) => {
-    expect(decodeJwt(input, NOW)).toEqual({
-      ok: false,
-      error:
-        "無効なJWT形式です(header.payload.signatureの3部構成である必要があります)",
+    expect(decodeJwt(input, NOW)).toEqual({ ok: false, error: FORMAT_ERROR });
+  });
+
+  it("5部構成のトークン(JWE)には専用のエラーを返す", () => {
+    expect(decodeJwt("a.b.c.d.e", NOW)).toEqual({ ok: false, error: JWE_ERROR });
+  });
+
+  it.each([
+    ["Bearer ", "Bearer "],
+    ["小文字のbearer", "bearer "],
+    ["前後の空白付き", "  Bearer   "],
+  ])("先頭の%sを取り除いてデコードする", (_, prefix) => {
+    const result = decodeJwt(`${prefix}${makeJwt({ sub: "1" })}`, NOW);
+    expect(result.ok).toBe(true);
+  });
+
+  it("iatとnbfを日時として返す", () => {
+    const result = decodeJwt(makeJwt({ iat: nowSec - 60, nbf: nowSec - 30 }), NOW);
+    expect(result).toMatchObject({
+      ok: true,
+      decoded: {
+        issuedAt: new Date(NOW - 60_000),
+        notBefore: new Date(NOW - 30_000),
+        isNotYetValid: false,
+      },
     });
+  });
+
+  it("nbfが未来ならまだ有効でない", () => {
+    const result = decodeJwt(makeJwt({ nbf: nowSec + 1 }), NOW);
+    expect(result.ok && result.decoded.isNotYetValid).toBe(true);
+  });
+
+  it("nbfが現在時刻ちょうどなら有効(RFC 7519)", () => {
+    const result = decodeJwt(makeJwt({ nbf: nowSec }), NOW);
+    expect(result.ok && result.decoded.isNotYetValid).toBe(false);
   });
 
   it.each([
     ["base64として不正", "!!!.@@@.sig"],
     ["JSONではない", `${Buffer.from("not json").toString("base64url")}.${encode({})}.sig`],
   ])("ヘッダーやペイロードが%sな場合はデコードエラーを返す", (_, input) => {
-    expect(decodeJwt(input, NOW)).toEqual({
-      ok: false,
-      error: "JWTのデコードに失敗しました",
-    });
+    expect(decodeJwt(input, NOW)).toEqual({ ok: false, error: DECODE_ERROR });
   });
 });
