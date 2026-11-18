@@ -10,6 +10,9 @@ https://dev-tools.nulltemp.com
 - JSON整形 (`/json-formatter`) — JSONデータを整形して表示します
 - JWTデコーダー (`/jwt-decoder`) — JWTのヘッダーとペイロードをデコードして表示します（署名の検証は行いません）
 - Unixタイムスタンプ変換 (`/unix-timestamp`) — Unixタイムスタンプと日時を相互に変換します
+- Base64エンコード・デコード (`/base64`) — テキストをBase64にエンコード、Base64をテキストにデコードします
+- URLエンコード・デコード (`/url-encode`) — テキストをパーセントエンコード、またはデコードします
+- UUID生成 (`/uuid`) — UUID(v4・v7)をまとめて生成します
 
 ## Getting Started
 
