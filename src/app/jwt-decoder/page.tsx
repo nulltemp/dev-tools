@@ -1,10 +1,18 @@
 "use client";
-import React, { useState } from "react";
-import CopyButton from "../CopyButton";
+import { useState } from "react";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import CodeBlock from "../CodeBlock";
+import ToolPage from "../ToolPage";
+import { monoInput } from "../inputStyles";
 import { findTool } from "../tools";
 import { decodeJwt, type DecodedJwt } from "./decodeJwt";
 
-const { name } = findTool("/jwt-decoder");
+const { name, description } = findTool("/jwt-decoder");
 
 interface TimeNote {
   label: string;
@@ -51,7 +59,7 @@ const toTimeNotes = (decoded: DecodedJwt): TimeNote[] => {
   return notes;
 };
 
-const JwtDecoder: React.FC = () => {
+export default function JwtDecoderPage() {
   const [input, setInput] = useState("");
   const [decoded, setDecoded] = useState<DecodedView | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -82,64 +90,55 @@ const JwtDecoder: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      <div className="main">
-        <h1 className="title">{name}</h1>
-        <div className="input-section">
-          <p className="note">
-            入力したJWTはブラウザ内でデコードされ、どこにも送信されません。
-            {"「Bearer 」付きのまま貼り付けても読み取れます。"}
-          </p>
-          <textarea
-            rows={6}
-            className="input-field"
-            value={input}
-            onChange={(e) => handleInputChange(e.target.value)}
-            placeholder="ここにJWTを入力してください"
-            aria-label="デコードするJWT"
-          />
-          <div className="button-section">
-            <button onClick={handleDecode}>デコード</button>
-          </div>
-          {error && (
-            <div className="error-message" role="alert">
-              {error}
-            </div>
-          )}
-          {decoded && (
-            <>
-              <div className="result-header">
-                <h2 className="section-title">ヘッダー</h2>
-                <CopyButton text={decoded.header} label="ヘッダーをコピー" />
-              </div>
-              <pre className="formatted-json">{decoded.header}</pre>
-              <div className="result-header">
-                <h2 className="section-title">ペイロード</h2>
-                <CopyButton text={decoded.payload} label="ペイロードをコピー" />
-              </div>
-              <pre className="formatted-json">{decoded.payload}</pre>
-              {decoded.timeNotes.map((note) => (
-                <p
-                  key={note.label}
-                  className={note.alert ? "note note-alert" : "note"}
-                >
-                  {note.label}: {note.text}
-                </p>
-              ))}
-              <div className="result-header">
-                <h2 className="section-title">署名</h2>
-                <CopyButton text={decoded.signature} label="署名をコピー" />
-              </div>
-              <pre className="formatted-json">{decoded.signature}</pre>
-              <p className="note">
+    <ToolPage title={name} description={description}>
+      <Stack spacing={2}>
+        <Alert severity="info" variant="outlined">
+          入力したJWTはブラウザ内でデコードされ、どこにも送信されません。
+          {"「Bearer 」付きのまま貼り付けても読み取れます。"}
+        </Alert>
+        <TextField
+          multiline
+          minRows={6}
+          value={input}
+          onChange={(e) => handleInputChange(e.target.value)}
+          placeholder="ここにJWTを入力してください"
+          slotProps={{ htmlInput: { "aria-label": "デコードするJWT" } }}
+          sx={monoInput}
+        />
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button variant="contained" onClick={handleDecode}>
+            デコード
+          </Button>
+        </Box>
+        {error && <Alert severity="error">{error}</Alert>}
+        {decoded && (
+          <>
+            <CodeBlock title="ヘッダー" text={decoded.header} copyLabel="ヘッダーをコピー" />
+            <CodeBlock
+              title="ペイロード"
+              text={decoded.payload}
+              copyLabel="ペイロードをコピー"
+            >
+              {decoded.timeNotes.length > 0 &&
+                decoded.timeNotes.map((note) => (
+                  <Typography
+                    key={note.label}
+                    variant="body2"
+                    color={note.alert ? "error" : "text.secondary"}
+                    sx={{ fontWeight: note.alert ? 700 : undefined }}
+                  >
+                    {note.label}: {note.text}
+                  </Typography>
+                ))}
+            </CodeBlock>
+            <CodeBlock title="署名" text={decoded.signature} copyLabel="署名をコピー">
+              <Typography variant="body2" color="text.secondary">
                 ※署名の検証は行っていません(デコードのみ)
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+              </Typography>
+            </CodeBlock>
+          </>
+        )}
+      </Stack>
+    </ToolPage>
   );
-};
-
-export default JwtDecoder;
+}
