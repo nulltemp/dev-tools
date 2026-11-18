@@ -12,9 +12,13 @@ npm run lint     # eslint . (flat config: eslint-config-next core-web-vitals + t
 npm test         # run unit tests once (Vitest)
 npm run test:watch  # Vitest in watch mode
 npx vitest run src/app/jwt-decoder  # run tests under one path
+npm run test:e2e # Playwright E2E tests against the static export (run npm run build first)
+npx playwright test e2e/tools.spec.ts -g "UUID"  # run some E2E tests
 ```
 
 Tests use Vitest (`vitest.config.mts`, node environment) and live next to the code as `src/**/*.test.ts`. Tool pages keep UI only; pure logic is extracted into a sibling module (e.g. `jwt-decoder/decodeJwt.ts`) and unit-tested there — follow this for new tools. Package manager is npm (package-lock.json is present).
+
+E2E tests (Playwright, `playwright.config.ts`) live in `e2e/` and run against `out/` served by `npm run start`, on a desktop and a mobile (Pixel 7) project, with `Asia/Tokyo` timezone. Import `test`/`expect` from `e2e/fixtures.ts`, not `@playwright/test`: its fixtures abort and record every non-localhost request (so CI never sends GA hits; `externalRequests` lets a test assert nothing was sent) and fail the test on any page error. It also has helpers: `openNav` (opens the mobile menu when needed), `resultBlock` (a `CodeBlock` by title), `definition` (a value in a `<dl>` result), `errorAlert`. When adding a tool, add its main flow to `e2e/tools.spec.ts`; `e2e/site.spec.ts` already covers nav, headings and horizontal overflow for every entry in `tools.ts`. `@playwright/test` is pinned to an exact version so it matches the installed browser. CI runs lint, unit tests, build, then E2E.
 
 ## Architecture
 

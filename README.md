@@ -29,6 +29,14 @@ npm test         # テスト実行 (Vitest)
 
 テストは Vitest で、各ツールのロジック（`src/app/<tool-name>/*.ts`）の隣に `*.test.ts` として置いています。
 
+画面の操作を確かめる E2E テストは Playwright で、`e2e/` に置いています。本番と同じ静的ファイルに対して動かすため、先にビルドしてから実行します（初回はブラウザのインストールも必要です）。
+
+```bash
+npx playwright install chromium  # 初回のみ
+npm run build
+npm run test:e2e
+```
+
 ## ツールの追加方法
 
 1. `src/app/<tool-name>/page.tsx` に新しいルートを作成する
