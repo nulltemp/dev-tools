@@ -5,7 +5,7 @@ export const SITE_NAME = "デベロッパーツール";
 export const PRIVACY_POLICY_URL = "https://nulltemp.com/privacy/";
 export const KOFI_URL = "https://ko-fi.com/nulltemp";
 export const SITE_DESCRIPTION =
-  "文字数カウンター、JSON整形、JWTデコーダー、Unixタイムスタンプ変換など、開発に便利なツール集";
+  "JSON整形、JWTデコーダー、Base64・URLエンコード、UUID生成、Unixタイムスタンプ変換など、開発に便利なツール集";
 
 // 静的ホスティングで Content-Type が正しく付くよう拡張子付きの静的画像を使う
 export const OG_IMAGE = {
@@ -42,6 +42,21 @@ export const tools: Tool[] = [
     href: "/unix-timestamp",
     name: "Unixタイムスタンプ変換",
     description: "Unixタイムスタンプと日時を相互に変換します",
+  },
+  {
+    href: "/base64",
+    name: "Base64エンコード・デコード",
+    description: "テキストをBase64にエンコード、Base64をテキストにデコードします",
+  },
+  {
+    href: "/url-encode",
+    name: "URLエンコード・デコード",
+    description: "テキストをパーセントエンコード、またはデコードします",
+  },
+  {
+    href: "/uuid",
+    name: "UUID生成",
+    description: "UUID(v4・v7)をまとめて生成します",
   },
 ];
 

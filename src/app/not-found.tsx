@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Button from "@mui/material/Button";
+import ToolPage from "./ToolPage";
 
 export const metadata: Metadata = {
   title: "ページが見つかりません",
@@ -8,16 +9,13 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="container">
-      <div className="main">
-        <h1 className="title">ページが見つかりません</h1>
-        <p className="not-found-message">
-          お探しのページは移動または削除されたか、URLが間違っている可能性があります。
-        </p>
-        <p>
-          <Link href="/">ツール一覧に戻る</Link>
-        </p>
-      </div>
-    </div>
+    <ToolPage
+      title="ページが見つかりません"
+      description="お探しのページは移動または削除されたか、URLが間違っている可能性があります。"
+    >
+      <Button href="/" variant="contained">
+        ツール一覧に戻る
+      </Button>
+    </ToolPage>
   );
 }

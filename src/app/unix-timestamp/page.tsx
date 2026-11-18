@@ -1,6 +1,17 @@
 "use client";
-import React, { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Typography from "@mui/material/Typography";
 import CopyButton from "../CopyButton";
+import ToolPage from "../ToolPage";
+import { monoInput } from "../inputStyles";
 import { findTool } from "../tools";
 import {
   formatDateTime,
@@ -11,7 +22,7 @@ import {
   type TimestampUnit,
 } from "./timestamp";
 
-const { name } = findTool("/unix-timestamp");
+const { name, description } = findTool("/unix-timestamp");
 
 type ZoneChoice = "local" | "utc";
 
@@ -31,25 +42,83 @@ interface ResultRow {
   copyable?: boolean;
 }
 
-const ResultTable: React.FC<{ rows: ResultRow[] }> = ({ rows }) => (
-  <table className="result-table">
-    <tbody>
+// 狭い画面では項目名を上の行に、値とコピーボタンを下の行に並べる
+function ResultTable({ rows }: { rows: ResultRow[] }) {
+  return (
+    <Box component="dl" sx={{ m: 0 }}>
       {rows.map((row) => (
-        <tr key={row.label}>
-          <th scope="row">{row.label}</th>
-          <td className="result-value">{row.value}</td>
-          <td className="result-copy">
+        <Box
+          key={row.label}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr auto", sm: "minmax(8rem, max-content) 1fr auto" },
+            alignItems: "center",
+            columnGap: 2,
+            rowGap: 0.25,
+            py: 1,
+            borderBottom: 1,
+            borderColor: "divider",
+            "&:last-of-type": { borderBottom: 0 },
+          }}
+        >
+          <Typography
+            component="dt"
+            variant="body2"
+            sx={{ color: "text.secondary", gridColumn: { xs: "1 / -1", sm: "auto" } }}
+          >
+            {row.label}
+          </Typography>
+          <Box
+            component="dd"
+            sx={{
+              m: 0,
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.875rem",
+              overflowWrap: "anywhere",
+              minWidth: 0,
+            }}
+          >
+            {row.value}
+          </Box>
+          <Box component="dd" sx={{ m: 0, minHeight: 30, display: "flex", alignItems: "center" }}>
             {row.copyable !== false && (
               <CopyButton text={row.value} label={`${row.label}をコピー`} />
             )}
-          </td>
-        </tr>
+          </Box>
+        </Box>
       ))}
-    </tbody>
-  </table>
-);
+    </Box>
+  );
+}
 
-const UnixTimestamp: React.FC = () => {
+// 入力欄・選択肢・「現在時刻」ボタンと、変換結果をまとめた1つの変換方向
+function ConverterSection({
+  title,
+  controls,
+  children,
+}: {
+  title: string;
+  controls: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <Paper component="section" variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
+      <Typography variant="h2" sx={{ mb: 2 }}>
+        {title}
+      </Typography>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        sx={{ alignItems: { sm: "center" } }}
+      >
+        {controls}
+      </Stack>
+      {children && <Stack spacing={1.5} sx={{ mt: 2 }}>{children}</Stack>}
+    </Paper>
+  );
+}
+
+export default function UnixTimestampPage() {
   const localTimeZone = useLocalTimeZone();
 
   // タイムスタンプ → 日時
@@ -90,42 +159,55 @@ const UnixTimestamp: React.FC = () => {
     dateInput.trim() && dateTimeZone ? parseDateTime(dateInput, dateTimeZone) : null;
 
   return (
-    <div className="container">
-      <div className="main">
-        <h1 className="title">{name}</h1>
-        <div className="input-section">
-          <p className="note">
-            日時はブラウザのタイムゾーン
-            {localTimeZone && `(${localTimeZone})`}
-            とUTCで表示します。入力はブラウザ内で変換され、送信されません。
-          </p>
-
-          <h2 className="section-title tool-section-title">タイムスタンプ → 日時</h2>
-          <div className="input-row">
-            <input
-              type="text"
-              inputMode="decimal"
-              className="input-mono"
-              value={timestampInput}
-              onChange={(e) => handleTimestampChange(e.target.value)}
-              placeholder="例: 1700000000"
-              aria-label="変換するUnixタイムスタンプ"
-            />
-            <select
-              value={unit}
-              onChange={(e) => setUnit(e.target.value as TimestampUnit)}
-              aria-label="タイムスタンプの単位"
-            >
-              <option value="auto">自動判定</option>
-              <option value="seconds">秒</option>
-              <option value="milliseconds">ミリ秒</option>
-            </select>
-            <button onClick={handleTimestampNow}>現在時刻</button>
-          </div>
+    <ToolPage
+      title={name}
+      description={
+        <>
+          {description}。日時はブラウザのタイムゾーン
+          {localTimeZone && `(${localTimeZone})`}
+          とUTCで表示します。入力はブラウザ内で変換され、送信されません。
+        </>
+      }
+    >
+      <Stack spacing={3}>
+        <ConverterSection
+          title="タイムスタンプ → 日時"
+          controls={
+            <>
+              <TextField
+                size="small"
+                value={timestampInput}
+                onChange={(e) => handleTimestampChange(e.target.value)}
+                placeholder="例: 1700000000"
+                slotProps={{
+                  htmlInput: {
+                    inputMode: "decimal",
+                    "aria-label": "変換するUnixタイムスタンプ",
+                  },
+                }}
+                sx={monoInput}
+              />
+              <ToggleButtonGroup
+                size="small"
+                exclusive
+                value={unit}
+                // 選択中のボタンをもう一度押すと null になるので、そのときは変えない
+                onChange={(_, value: TimestampUnit | null) => value && setUnit(value)}
+                aria-label="タイムスタンプの単位"
+                sx={{ flexShrink: 0 }}
+              >
+                <ToggleButton value="auto">自動判定</ToggleButton>
+                <ToggleButton value="seconds">秒</ToggleButton>
+                <ToggleButton value="milliseconds">ミリ秒</ToggleButton>
+              </ToggleButtonGroup>
+              <Button variant="outlined" onClick={handleTimestampNow} sx={{ flexShrink: 0 }}>
+                現在時刻
+              </Button>
+            </>
+          }
+        >
           {timestampResult && !timestampResult.ok && (
-            <div className="error-message" role="alert">
-              {timestampResult.error}
-            </div>
+            <Alert severity="error">{timestampResult.error}</Alert>
           )}
           {timestampResult?.ok && localTimeZone && (
             <>
@@ -145,39 +227,45 @@ const UnixTimestamp: React.FC = () => {
                 ]}
               />
               {unit === "auto" && (
-                <p className="note">
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   {timestampResult.unit === "seconds" ? "秒" : "ミリ秒"}
                   として解釈しました(桁数から自動判定)
-                </p>
+                </Typography>
               )}
             </>
           )}
+        </ConverterSection>
 
-          <h2 className="section-title tool-section-title">日時 → タイムスタンプ</h2>
-          <div className="input-row">
-            <input
-              type="text"
-              className="input-mono"
-              value={dateInput}
-              onChange={(e) => setDateInput(e.target.value)}
-              placeholder="例: 2026-11-17 12:34:56"
-              aria-label="変換する日時"
-            />
-            <select
-              value={zone}
-              onChange={(e) => setZone(e.target.value as ZoneChoice)}
-              aria-label="日時のタイムゾーン"
-            >
-              <option value="local">ローカル</option>
-              <option value="utc">UTC</option>
-            </select>
-            <button onClick={handleDateNow}>現在時刻</button>
-          </div>
-          {dateResult && !dateResult.ok && (
-            <div className="error-message" role="alert">
-              {dateResult.error}
-            </div>
-          )}
+        <ConverterSection
+          title="日時 → タイムスタンプ"
+          controls={
+            <>
+              <TextField
+                size="small"
+                value={dateInput}
+                onChange={(e) => setDateInput(e.target.value)}
+                placeholder="例: 2026-11-17 12:34:56"
+                slotProps={{ htmlInput: { "aria-label": "変換する日時" } }}
+                sx={monoInput}
+              />
+              <ToggleButtonGroup
+                size="small"
+                exclusive
+                value={zone}
+                onChange={(_, value: ZoneChoice | null) => value && setZone(value)}
+                aria-label="日時のタイムゾーン"
+                sx={{ flexShrink: 0 }}
+              >
+                <ToggleButton value="local">ローカル</ToggleButton>
+                <ToggleButton value="utc">UTC</ToggleButton>
+              </ToggleButtonGroup>
+              <Button variant="outlined" onClick={handleDateNow} sx={{ flexShrink: 0 }}>
+                現在時刻
+              </Button>
+            </>
+          }
+        >
+          {dateResult && !dateResult.ok && <Alert severity="error">{dateResult.error}</Alert>}
           {dateResult?.ok && (
             <ResultTable
               rows={[
@@ -190,13 +278,11 @@ const UnixTimestamp: React.FC = () => {
               ]}
             />
           )}
-          <p className="note">
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
             「2026-11-17T12:34:56+09:00」のようにオフセットを付けると、選んだタイムゾーンより優先します。
-          </p>
-        </div>
-      </div>
-    </div>
+          </Typography>
+        </ConverterSection>
+      </Stack>
+    </ToolPage>
   );
-};
-
-export default UnixTimestamp;
+}

@@ -8,20 +8,23 @@
     "start": "vite preview --config vite.preview.config.mts",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.6",
-    "@mui/material-nextjs": "^7.3.6",
+    "@mui/icons-material": "^9.5.0",
+    "@mui/material": "^9.5.0",
+    "@mui/material-nextjs": "^9.5.0",
     "@next/third-parties": "^16.4.6",
     "next": "16.4.6",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",

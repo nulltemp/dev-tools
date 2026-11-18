@@ -1,5 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import Button from "@mui/material/Button";
+import CheckIcon from "@mui/icons-material/Check";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
 
 type CopyStatus = "idle" | "copied" | "failed";
 
@@ -7,6 +11,12 @@ const LABELS: Record<CopyStatus, string> = {
   idle: "コピー",
   copied: "コピーしました",
   failed: "コピーに失敗しました",
+};
+
+const ICONS: Record<CopyStatus, React.ReactNode> = {
+  idle: <ContentCopyIcon />,
+  copied: <CheckIcon />,
+  failed: <ErrorOutlineIcon />,
 };
 
 export default function CopyButton({
@@ -35,14 +45,17 @@ export default function CopyButton({
   };
 
   return (
-    <button
-      type="button"
-      className="copy-button"
+    <Button
+      size="small"
+      variant="outlined"
+      color={status === "failed" ? "error" : status === "copied" ? "success" : "primary"}
+      startIcon={ICONS[status]}
       onClick={handleCopy}
       aria-label={status === "idle" ? label : undefined}
       aria-live="polite"
+      sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
     >
       {LABELS[status]}
-    </button>
+    </Button>
   );
 }

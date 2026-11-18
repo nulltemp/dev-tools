@@ -10,6 +10,9 @@ https://dev-tools.nulltemp.com
 - JSON整形 (`/json-formatter`) — JSONデータを整形して表示します
 - JWTデコーダー (`/jwt-decoder`) — JWTのヘッダーとペイロードをデコードして表示します（署名の検証は行いません）
 - Unixタイムスタンプ変換 (`/unix-timestamp`) — Unixタイムスタンプと日時を相互に変換します
+- Base64エンコード・デコード (`/base64`) — テキストをBase64にエンコード、Base64をテキストにデコードします
+- URLエンコード・デコード (`/url-encode`) — テキストをパーセントエンコード、またはデコードします
+- UUID生成 (`/uuid`) — UUID(v4・v7)をまとめて生成します
 
 ## Getting Started
 
@@ -26,6 +29,14 @@ npm test         # テスト実行 (Vitest)
 
 テストは Vitest で、各ツールのロジック（`src/app/<tool-name>/*.ts`）の隣に `*.test.ts` として置いています。
 
+画面の操作を確かめる E2E テストは Playwright で、`e2e/` に置いています。本番と同じ静的ファイルに対して動かすため、先にビルドしてから実行します（初回はブラウザのインストールも必要です）。
+
+```bash
+npx playwright install chromium  # 初回のみ
+npm run build
+npm run test:e2e
+```
+
 ## ツールの追加方法
 
 1. `src/app/<tool-name>/page.tsx` に新しいルートを作成する
@@ -34,7 +45,7 @@ npm test         # テスト実行 (Vitest)
 
 各ツールページは `"use client"` の自己完結したコンポーネントで、独自の `useState` ベースのロジックのみを持ちます（ツール間の共有状態・APIレイヤー・データフェッチはありません）。
 
-スタイリングは MUI (Material UI) と `src/app/globals.css` のユーティリティクラス（`.container`, `.cards`, `.card`, `.input-section` など）を併用しています。既存のクラスがあれば新規CSSを追加せず再利用してください。
+スタイリングは MUI (Material UI) に統一しています。配色・ダークモード・フォントなどは `src/app/theme.ts` で管理し、各ページは MUI コンポーネントと `sx` で組み立ててください。ページの外枠には `ToolPage`、コピー付きの整形済み表示には `CodeBlock` を使います。
 
 詳細なアーキテクチャ方針は [CLAUDE.md](./CLAUDE.md) を参照してください。
 

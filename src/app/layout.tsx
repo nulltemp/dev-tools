@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
-import Link from "next/link";
 import { Roboto } from "next/font/google";
+import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
-import SidebarNav from "./SidebarNav";
+import AppShell from "./AppShell";
 import theme from "./theme";
 import {
-  KOFI_URL,
   OG_IMAGE,
-  PRIVACY_POLICY_URL,
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_URL,
@@ -57,23 +55,8 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-            <div className="app-shell">
-              <aside className="sidebar">
-                <h2 className="sidebar-title">
-                  <Link href="/">ツール</Link>
-                </h2>
-                <SidebarNav />
-                <footer className="sidebar-footer">
-                  <a href={KOFI_URL} target="_blank" rel="noopener">
-                    Ko-fiで支援する
-                  </a>
-                  <a href={PRIVACY_POLICY_URL}>プライバシーポリシー</a>
-                </footer>
-              </aside>
-              <main className="app-content">
-                {children}
-              </main>
-            </div>
+            <CssBaseline enableColorScheme />
+            <AppShell>{children}</AppShell>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

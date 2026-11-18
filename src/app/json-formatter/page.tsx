@@ -1,12 +1,19 @@
 "use client";
-import React, { useState } from "react";
-import CopyButton from "../CopyButton";
+import { useState } from "react";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import CodeBlock from "../CodeBlock";
+import ToolPage from "../ToolPage";
+import { monoInput } from "../inputStyles";
 import { findTool } from "../tools";
 import { formatJson } from "./formatJson";
 
-const { name } = findTool("/json-formatter");
+const { name, description } = findTool("/json-formatter");
 
-const JsonFormatter: React.FC = () => {
+export default function JsonFormatterPage() {
   const [input, setInput] = useState("");
   const [formatted, setFormatted] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,38 +32,27 @@ const JsonFormatter: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      <div className="main">
-        <h1 className="title">{name}</h1>
-        <div className="input-section">
-          <textarea
-            rows={10}
-            className="input-field"
-            value={input}
-            onChange={(e) => handleInputChange(e.target.value)}
-            placeholder="ここにJSONを入力してください"
-            aria-label="整形するJSON"
-          />
-          <div className="button-section">
-            <button onClick={handleFormat}>整形</button>
-          </div>
-          {error && (
-            <div className="error-message" role="alert">
-              {error}
-            </div>
-          )}
-          {formatted && (
-            <>
-              <div className="result-header">
-                <CopyButton text={formatted} label="整形結果をコピー" />
-              </div>
-              <pre className="formatted-json">{formatted}</pre>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+    <ToolPage title={name} description={description}>
+      <Stack spacing={2}>
+        <TextField
+          multiline
+          minRows={10}
+          value={input}
+          onChange={(e) => handleInputChange(e.target.value)}
+          placeholder="ここにJSONを入力してください"
+          slotProps={{ htmlInput: { "aria-label": "整形するJSON" } }}
+          sx={monoInput}
+        />
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button variant="contained" onClick={handleFormat}>
+            整形
+          </Button>
+        </Box>
+        {error && <Alert severity="error">{error}</Alert>}
+        {formatted && (
+          <CodeBlock title="整形結果" text={formatted} copyLabel="整形結果をコピー" />
+        )}
+      </Stack>
+    </ToolPage>
   );
-};
-
-export default JsonFormatter;
+}
