@@ -34,7 +34,7 @@ npm test         # テスト実行 (Vitest)
 
 各ツールページは `"use client"` の自己完結したコンポーネントで、独自の `useState` ベースのロジックのみを持ちます（ツール間の共有状態・APIレイヤー・データフェッチはありません）。
 
-スタイリングは MUI (Material UI) と `src/app/globals.css` のユーティリティクラス（`.container`, `.cards`, `.card`, `.input-section` など）を併用しています。既存のクラスがあれば新規CSSを追加せず再利用してください。
+スタイリングは MUI (Material UI) に統一しています。配色・ダークモード・フォントなどは `src/app/theme.ts` で管理し、各ページは MUI コンポーネントと `sx` で組み立ててください。ページの外枠には `ToolPage`、コピー付きの整形済み表示には `CodeBlock` を使います。
 
 詳細なアーキテクチャ方針は [CLAUDE.md](./CLAUDE.md) を参照してください。
 
