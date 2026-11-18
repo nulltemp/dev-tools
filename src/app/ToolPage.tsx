@@ -16,7 +16,7 @@ export default function ToolPage({
       <Box component="header" sx={{ mb: 3 }}>
         <Typography variant="h1">{title}</Typography>
         {description && (
-          <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+          <Typography sx={{ color: "text.secondary", mt: 0.5 }}>
             {description}
           </Typography>
         )}

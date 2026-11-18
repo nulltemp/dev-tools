@@ -124,15 +124,17 @@ export default function JwtDecoderPage() {
                   <Typography
                     key={note.label}
                     variant="body2"
-                    color={note.alert ? "error" : "text.secondary"}
-                    sx={{ fontWeight: note.alert ? 700 : undefined }}
+                    sx={{
+                      color: note.alert ? "error.main" : "text.secondary",
+                      fontWeight: note.alert ? 700 : undefined,
+                    }}
                   >
                     {note.label}: {note.text}
                   </Typography>
                 ))}
             </CodeBlock>
             <CodeBlock title="署名" text={decoded.signature} copyLabel="署名をコピー">
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 ※署名の検証は行っていません(デコードのみ)
               </Typography>
             </CodeBlock>

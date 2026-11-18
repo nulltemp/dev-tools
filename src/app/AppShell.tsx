@@ -67,7 +67,7 @@ function DrawerContent({ onNavigate }: { onNavigate?: () => void }) {
                   <ListItemText
                     primary={tool.name}
                     slotProps={{
-                      primary: { fontSize: "0.9375rem", fontWeight: current ? 700 : 400 },
+                      primary: { sx: { fontSize: "0.9375rem", fontWeight: current ? 700 : 400 } },
                     }}
                   />
                 </ListItemButton>

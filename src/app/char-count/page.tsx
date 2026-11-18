@@ -26,7 +26,7 @@ export default function CharCounterPage() {
           slotProps={{ htmlInput: { "aria-label": "文字数を数えるテキスト" } }}
         />
         <Paper variant="outlined" sx={{ px: 2.5, py: 1.5, alignSelf: "flex-start" }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
             文字数
           </Typography>
           <Typography

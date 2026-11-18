@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
 
 type CopyStatus = "idle" | "copied" | "failed";
 

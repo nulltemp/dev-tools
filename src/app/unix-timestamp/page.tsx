@@ -64,8 +64,7 @@ function ResultTable({ rows }: { rows: ResultRow[] }) {
           <Typography
             component="dt"
             variant="body2"
-            color="text.secondary"
-            sx={{ gridColumn: { xs: "1 / -1", sm: "auto" } }}
+            sx={{ color: "text.secondary", gridColumn: { xs: "1 / -1", sm: "auto" } }}
           >
             {row.label}
           </Typography>
@@ -228,7 +227,7 @@ export default function UnixTimestampPage() {
                 ]}
               />
               {unit === "auto" && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   {timestampResult.unit === "seconds" ? "秒" : "ミリ秒"}
                   として解釈しました(桁数から自動判定)
                 </Typography>
@@ -279,7 +278,7 @@ export default function UnixTimestampPage() {
               ]}
             />
           )}
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
             「2026-11-17T12:34:56+09:00」のようにオフセットを付けると、選んだタイムゾーンより優先します。
           </Typography>
         </ConverterSection>

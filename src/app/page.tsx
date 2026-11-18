@@ -29,10 +29,10 @@ export default function Home() {
           >
             <CardActionArea href={tool.href} sx={{ height: "100%" }}>
               <CardContent>
-                <Typography variant="h2" color="primary" sx={{ mb: 0.5 }}>
+                <Typography variant="h2" sx={{ color: "primary.main", mb: 0.5 }}>
                   {tool.name}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   {tool.description}
                 </Typography>
               </CardContent>
