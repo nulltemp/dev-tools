@@ -1,4 +1,4 @@
-import { tools } from "../src/app/tools";
+import { GITHUB_URL, tools } from "../src/app/tools";
 import { expect, isMobile, openNav, test } from "./fixtures";
 
 const pages = [{ href: "/", name: "デベロッパーツール" }, ...tools];
@@ -36,6 +36,15 @@ test.describe("サイト全体", () => {
       await expect(current).toHaveAttribute("aria-current", "page");
       if (isMobile(page)) await page.keyboard.press("Escape");
     }
+  });
+
+  test("ナビにGitHubリポジトリへのリンクがある", async ({ page }) => {
+    await page.goto("/");
+    await openNav(page);
+    // フッターはナビ(<nav>)の外にあるので、表示中のドロワーから探す
+    const link = page.getByRole("link", { name: "GitHub（ソースコード）" }).filter({ visible: true });
+    await expect(link).toHaveAttribute("href", GITHUB_URL);
+    await expect(link).toHaveAttribute("target", "_blank");
   });
 
   test("404ページを表示し、一覧に戻れる", async ({ page }) => {
