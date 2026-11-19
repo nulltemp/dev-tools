@@ -31,6 +31,8 @@ This is a Next.js (App Router) collection of small, independent developer utilit
 
 - **SEO**: the site is a static export (`output: "export"` in `next.config.ts`), so `sitemap.ts` / `robots.ts` declare `dynamic = "force-static"`. `metadataBase` is set in the root layout from `SITE_URL` in `tools.ts`. A child `openGraph` replaces the parent's instead of merging, so `toolMetadata` repeats the shared fields including `images: [OG_IMAGE]` (`public/og.png`, a static PNG with an extension so static hosts serve the right Content-Type).
 
+- **CSP**: `src/app/csp.ts` defines the Content Security Policy, delivered as a `<meta http-equiv>` in the root layout (production builds only, since the dev server needs eval/WebSocket for HMR). It limits `connect-src`/`img-src` to `'self'` and the GA4 hosts, backing the "入力は送信されません" claim; a new external host must be added there. E2E fails any test that logs a CSP violation.
+
 - **Analytics**: GA4 via `@next/third-parties` `GoogleAnalytics` in the root layout, rendered only when `NEXT_PUBLIC_GA_ID` is set. The ID lives in the committed `.env.production` (un-ignored in `.gitignore`), so only `next build` output includes the tag and `npm run dev` traffic is not tracked.
   Each tool page is a self-contained client component (`"use client"`) with its own local `useState`-based logic — there is no shared state, API layer, or data-fetching between tools.
 
