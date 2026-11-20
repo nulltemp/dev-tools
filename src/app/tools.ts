@@ -4,6 +4,7 @@ export const SITE_URL = "https://dev-tools.nulltemp.com";
 export const SITE_NAME = "デベロッパーツール";
 export const PRIVACY_POLICY_URL = "https://nulltemp.com/privacy/";
 export const KOFI_URL = "https://ko-fi.com/nulltemp";
+export const GITHUB_URL = "https://github.com/nulltemp/dev-tools";
 export const SITE_DESCRIPTION =
   "JSON整形、JWTデコーダー、Base64・URLエンコード、UUID生成、Unixタイムスタンプ変換など、開発に便利なツール集";
 

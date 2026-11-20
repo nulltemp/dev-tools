@@ -5,9 +5,10 @@ export { expect };
 // 各テストで共通にすること:
 // - テスト対象(localhost)以外への通信は止めて記録する。CI から Google Analytics に計測が送られるのを防ぎ、
 //   「入力は送信されません」の確認にも使う
-// - ページ内の JavaScript エラーがあればテストを失敗させる
+// - ページ内の JavaScript エラーや CSP 違反があればテストを失敗させる
 // フィクスチャの第2引数は Playwright の慣例では use だが、React の use() と誤認されないよう run と呼ぶ
-export const test = base.extend<{ externalRequests: string[] }>({
+// pageErrors は意図的にエラーを起こすテストが確認後に空にできるよう公開している
+export const test = base.extend<{ externalRequests: string[]; pageErrors: string[] }>({
   externalRequests: [
     async ({ page, baseURL }, run) => {
       const requests: string[] = [];
@@ -24,11 +25,18 @@ export const test = base.extend<{ externalRequests: string[] }>({
     // テストで使わなくても必ず有効にする
     { auto: true },
   ],
-  page: async ({ page }, run) => {
-    const errors: string[] = [];
+  pageErrors: async ({}, run) => {
+    await run([]);
+  },
+  page: async ({ page, pageErrors: errors }, run) => {
     page.on("pageerror", (error) => errors.push(String(error)));
+    page.on("console", (message) => {
+      if (message.type() === "error" && message.text().includes("Content Security Policy")) {
+        errors.push(message.text());
+      }
+    });
     await run(page);
-    expect(errors, "ページで JavaScript エラーが起きた").toEqual([]);
+    expect(errors, "ページで JavaScript エラーか CSP 違反が起きた").toEqual([]);
   },
 });
 

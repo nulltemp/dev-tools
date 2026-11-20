@@ -13,7 +13,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import MenuIcon from "@mui/icons-material/Menu";
-import { KOFI_URL, PRIVACY_POLICY_URL, SITE_NAME, tools } from "./tools";
+import { GITHUB_URL, KOFI_URL, PRIVACY_POLICY_URL, SITE_NAME, tools } from "./tools";
 
 const DRAWER_WIDTH = 240;
 
@@ -91,6 +91,9 @@ function DrawerContent({ onNavigate }: { onNavigate?: () => void }) {
       >
         <a href={KOFI_URL} target="_blank" rel="noopener">
           Ko-fiで支援する
+        </a>
+        <a href={GITHUB_URL} target="_blank" rel="noopener">
+          GitHub（ソースコード）
         </a>
         <a href={PRIVACY_POLICY_URL}>プライバシーポリシー</a>
       </Box>

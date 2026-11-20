@@ -5,6 +5,7 @@ import { Roboto } from "next/font/google";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import AppShell from "./AppShell";
+import { CONTENT_SECURITY_POLICY } from "./csp";
 import theme from "./theme";
 import {
   OG_IMAGE,
@@ -52,6 +53,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={roboto.variable}>
+      {/* 開発サーバーは HMR に eval や WebSocket を使うため、本番ビルドでだけ設定する */}
+      {process.env.NODE_ENV === "production" && (
+        <head>
+          <meta httpEquiv="Content-Security-Policy" content={CONTENT_SECURITY_POLICY} />
+        </head>
+      )}
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>

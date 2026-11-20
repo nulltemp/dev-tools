@@ -1,4 +1,4 @@
-import { tools } from "../src/app/tools";
+import { GITHUB_URL, tools } from "../src/app/tools";
 import { expect, isMobile, openNav, test } from "./fixtures";
 
 const pages = [{ href: "/", name: "デベロッパーツール" }, ...tools];
@@ -36,6 +36,15 @@ test.describe("サイト全体", () => {
       await expect(current).toHaveAttribute("aria-current", "page");
       if (isMobile(page)) await page.keyboard.press("Escape");
     }
+  });
+
+  test("ナビにGitHubリポジトリへのリンクがある", async ({ page }) => {
+    await page.goto("/");
+    await openNav(page);
+    // フッターはナビ(<nav>)の外にあるので、表示中のドロワーから探す
+    const link = page.getByRole("link", { name: "GitHub（ソースコード）" }).filter({ visible: true });
+    await expect(link).toHaveAttribute("href", GITHUB_URL);
+    await expect(link).toHaveAttribute("target", "_blank");
   });
 
   test("404ページを表示し、一覧に戻れる", async ({ page }) => {
@@ -110,5 +119,52 @@ test.describe("入力が送信されない", () => {
     expect(externalRequests.filter((url) => url.includes("secret") || url.includes("eyJ"))).toEqual(
       []
     );
+  });
+
+  test("Google Analytics の読み込みと送信は CSP で止まらない", async ({ page }) => {
+    // 本物の gtag.js の代わりに、GA4 と同じ送信先へ通信するスクリプトを返す。
+    // 送信自体は fixtures が中断するので計測は届かず、CSP 違反だけが fixtures のチェックで検出される
+    const collect = [
+      "https://www.google-analytics.com/g/collect",
+      "https://region1.google-analytics.com/g/collect",
+      "https://region1.analytics.google.com/g/collect",
+    ];
+    await page.route("https://www.googletagmanager.com/gtag/js*", (route) =>
+      route.fulfill({
+        contentType: "text/javascript",
+        body: `window.__gaStub = Promise.allSettled(${JSON.stringify(collect)}.flatMap((url) => [
+          fetch(url, { method: "POST" }),
+          new Promise((resolve) => { const img = new Image(); img.onload = img.onerror = resolve; img.src = url; }),
+        ]));`,
+      })
+    );
+    await page.goto("/jwt-decoder");
+    await page.waitForFunction(() => "__gaStub" in window);
+    await page.evaluate(() => (window as unknown as { __gaStub: Promise<unknown> }).__gaStub);
+  });
+
+  test("CSP で自サイトと Google Analytics 以外への通信が禁止されている", async ({
+    page,
+    externalRequests,
+    pageErrors,
+  }) => {
+    await page.goto("/jwt-decoder");
+    // 意図的に違反させ、ページ内で違反イベントを受け取る
+    const blocked = await page.evaluate(async () => {
+      const violation = new Promise<string>((resolve) =>
+        document.addEventListener("securitypolicyviolation", (e) =>
+          resolve(`${e.effectiveDirective} ${e.blockedURI}`)
+        )
+      );
+      await fetch("https://example.com/collect").catch(() => {});
+      return violation;
+    });
+    expect(blocked).toBe("connect-src https://example.com/collect");
+    // CSP で止まり、ブラウザから送信されていない
+    expect(externalRequests).not.toContain("https://example.com/collect");
+    // 意図した違反なので、fixtures の CSP 違反チェックからは外す
+    expect(pageErrors.length).toBeGreaterThan(0);
+    for (const error of pageErrors) expect(error).toContain("example.com/collect");
+    pageErrors.length = 0;
   });
 });
