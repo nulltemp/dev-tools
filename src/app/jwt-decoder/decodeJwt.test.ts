@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  DECODE_ERROR,
   FORMAT_ERROR,
   JWE_ERROR,
-  base64UrlDecode,
+  decodeBase64UrlSegment,
   decodeJwt,
   normalizeToken,
 } from "./decodeJwt";
@@ -17,25 +16,49 @@ const makeJwt = (payload: unknown, header: unknown = { alg: "HS256", typ: "JWT" 
 const NOW = Date.UTC(2026, 0, 1); // 2026-01-01T00:00:00Z
 const nowSec = NOW / 1000;
 
-describe("base64UrlDecode", () => {
+describe("decodeBase64UrlSegment", () => {
   it.each([
     ["パディングなし(余り2)", "YQ", "a"],
     ["パディングなし(余り3)", "YWI", "ab"],
     ["パディング不要", "YWJj", "abc"],
   ])("%s をデコードできる", (_, input, expected) => {
-    expect(base64UrlDecode(input)).toBe(expected);
+    expect(decodeBase64UrlSegment(input)).toEqual({ ok: true, text: expected });
   });
 
   it("base64urlの - と _ を扱える", () => {
     // "?>?" を base64 にすると "Pz4/" になり、base64url では "Pz4_"
-    expect(base64UrlDecode("Pz4_")).toBe("?>?");
+    expect(decodeBase64UrlSegment("Pz4_")).toEqual({ ok: true, text: "?>?" });
     // "~~~" を base64 にすると "fn5+" になり、base64url では "fn5-"
-    expect(base64UrlDecode("fn5-")).toBe("~~~");
+    expect(decodeBase64UrlSegment("fn5-")).toEqual({ ok: true, text: "~~~" });
   });
 
   it("UTF-8のマルチバイト文字をデコードできる", () => {
     const encoded = Buffer.from("日本語").toString("base64url");
-    expect(base64UrlDecode(encoded)).toBe("日本語");
+    expect(decodeBase64UrlSegment(encoded)).toEqual({ ok: true, text: "日本語" });
+  });
+
+  it.each([
+    ["空白", "e30 x", "Base64URLで使えない文字(空白)が含まれています"],
+    ["改行", "e30\nx", "Base64URLで使えない文字(改行)が含まれています"],
+    ["Base64の+", "e3+x", "Base64URLで使えない文字(「+」)が含まれています"],
+    ["パディングの=", "YQ==", "「=」が含まれています(JWTのBase64URLではパディングの「=」を付けません)"],
+  ])("%sを含むと失敗する", (_, input, reason) => {
+    expect(decodeBase64UrlSegment(input)).toEqual({ ok: false, reason });
+  });
+
+  it("長さが4n+1(途中で切れている)だと失敗する", () => {
+    expect(decodeBase64UrlSegment("e30xx")).toEqual({
+      ok: false,
+      reason: "Base64URLの長さが正しくありません(途中で切れている可能性があります)",
+    });
+  });
+
+  it("不正なUTF-8を置換文字にせず失敗する", () => {
+    const encoded = Buffer.from([0x22, 0xff, 0x22]).toString("base64url");
+    expect(decodeBase64UrlSegment(encoded)).toEqual({
+      ok: false,
+      reason: "デコード結果がUTF-8のテキストではありません",
+    });
   });
 });
 
@@ -159,10 +182,43 @@ describe("decodeJwt", () => {
     expect(result.ok && result.decoded.isNotYetValid).toBe(false);
   });
 
-  it.each([
-    ["base64として不正", "!!!.@@@.sig"],
-    ["JSONではない", `${Buffer.from("not json").toString("base64url")}.${encode({})}.sig`],
-  ])("ヘッダーやペイロードが%sな場合はデコードエラーを返す", (_, input) => {
-    expect(decodeJwt(input, NOW)).toEqual({ ok: false, error: DECODE_ERROR });
+  it("ヘッダーのBase64URLが不正ならヘッダーのエラーと分かる", () => {
+    expect(decodeJwt("!!!.@@@.sig", NOW)).toEqual({
+      ok: false,
+      error: "ヘッダー: Base64URLで使えない文字(「!」)が含まれています",
+    });
+  });
+
+  it("ペイロードに空白が入っていたら受け入れない", () => {
+    expect(decodeJwt(`${encode({ alg: "HS256" })}.e30 .x`, NOW)).toEqual({
+      ok: false,
+      error: "ペイロード: Base64URLで使えない文字(空白)が含まれています",
+    });
+  });
+
+  it("途中で切れたペイロードは長さのエラーを返す", () => {
+    expect(decodeJwt(`${encode({ alg: "HS256" })}.e.x`, NOW)).toEqual({
+      ok: false,
+      error: "ペイロード: Base64URLの長さが正しくありません(途中で切れている可能性があります)",
+    });
+  });
+
+  it("ペイロードが不正なUTF-8ならエラーを返す", () => {
+    const payload = Buffer.from([0x7b, 0x22, 0x61, 0x22, 0x3a, 0x22, 0xff, 0x22, 0x7d]).toString("base64url");
+    expect(decodeJwt(`${encode({ alg: "HS256" })}.${payload}.sig`, NOW)).toEqual({
+      ok: false,
+      error: "ペイロード: デコード結果がUTF-8のテキストではありません",
+    });
+  });
+
+  it("JSONでなければ、どの部分の何文字目かを返す", () => {
+    expect(decodeJwt(`${Buffer.from("not json").toString("base64url")}.${encode({})}.sig`, NOW)).toEqual({
+      ok: false,
+      error: "ヘッダー: JSONとして正しくありません(1行目1文字目: 「null」の綴りが正しくありません)",
+    });
+    expect(decodeJwt(`${encode({ alg: "HS256" })}.${Buffer.from('{"a":1,}').toString("base64url")}.sig`, NOW)).toEqual({
+      ok: false,
+      error: "ペイロード: JSONとして正しくありません(1行目7文字目: 最後の要素の後ろに余分なカンマがあります)",
+    });
   });
 });
