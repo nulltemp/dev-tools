@@ -4,7 +4,14 @@ export type FormatJsonResult =
   | { ok: true; formatted: string }
   | { ok: false; error: string };
 
-const INDENT = "  ";
+// 整形に使えるインデント
+export const INDENTS = {
+  "2": "  ",
+  "4": "    ",
+  tab: "\t",
+} as const;
+export type IndentKey = keyof typeof INDENTS;
+
 const WHITESPACE = new Set([" ", "\t", "\n", "\r"]);
 
 // 文字列リテラルの閉じる " の位置を返す(input は検証済みの JSON であること)
@@ -17,9 +24,10 @@ const findStringEnd = (input: string, start: number): number => {
 };
 
 // 値を解釈すると大きな数値の桁や数値の表記、キーの順序や重複が変わってしまうため、
-// 元のテキストを保ったまま空白だけを整える(input は検証済みの JSON であること)
-const reindent = (input: string): string => {
-  const lineBreak = (depth: number) => `\n${INDENT.repeat(depth)}`;
+// 元のテキストを保ったまま空白だけを整える(input は検証済みの JSON であること)。
+// indent が null なら改行・インデントを入れずに圧縮する
+const reindent = (input: string, indent: string | null): string => {
+  const lineBreak = (depth: number) => (indent === null ? "" : `\n${indent.repeat(depth)}`);
   let output = "";
   let depth = 0;
 
@@ -47,7 +55,7 @@ const reindent = (input: string): string => {
     } else if (char === ",") {
       output += char + lineBreak(depth);
     } else if (char === ":") {
-      output += ": ";
+      output += indent === null ? ":" : ": ";
     } else {
       output += char;
     }
@@ -55,7 +63,7 @@ const reindent = (input: string): string => {
   return output;
 };
 
-export const formatJson = (input: string): FormatJsonResult => {
+const transformJson = (input: string, indent: string | null): FormatJsonResult => {
   try {
     JSON.parse(input);
   } catch {
@@ -68,5 +76,10 @@ export const formatJson = (input: string): FormatJsonResult => {
         : "無効なJSONです",
     };
   }
-  return { ok: true, formatted: reindent(input) };
+  return { ok: true, formatted: reindent(input, indent) };
 };
+
+export const formatJson = (input: string, indent: IndentKey = "2"): FormatJsonResult =>
+  transformJson(input, INDENTS[indent]);
+
+export const minifyJson = (input: string): FormatJsonResult => transformJson(input, null);

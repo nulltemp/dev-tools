@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatJson } from "./formatJson";
+import { formatJson, minifyJson } from "./formatJson";
 
 describe("formatJson", () => {
   it("オブジェクトを2スペースインデントで整形する", () => {
@@ -91,5 +91,49 @@ describe("formatJson", () => {
     const result = formatJson(input);
     expect(result.ok).toBe(false);
     expect(!result.ok && result.error).toContain(`無効なJSONです(${expected}`);
+  });
+});
+
+describe("formatJson のインデント幅", () => {
+  it("4スペースで整形する", () => {
+    expect(formatJson('{"a":[1]}', "4")).toEqual({
+      ok: true,
+      formatted: '{\n    "a": [\n        1\n    ]\n}',
+    });
+  });
+
+  it("タブで整形する", () => {
+    expect(formatJson('{"a":[1]}', "tab")).toEqual({
+      ok: true,
+      formatted: '{\n\t"a": [\n\t\t1\n\t]\n}',
+    });
+  });
+});
+
+describe("minifyJson", () => {
+  it("空白と改行を取り除いて1行にする", () => {
+    expect(minifyJson('{\n  "a": 1,\n  "b": [ true, null ],\n  "c": {}\n}')).toEqual({
+      ok: true,
+      formatted: '{"a":1,"b":[true,null],"c":{}}',
+    });
+  });
+
+  it("文字列の中の空白は残す", () => {
+    expect(minifyJson('{ "a b" : " x , y " }')).toEqual({
+      ok: true,
+      formatted: '{"a b":" x , y "}',
+    });
+  });
+
+  it("大きな数値の桁を保つ", () => {
+    expect(minifyJson("[ 12345678901234567890 ]")).toEqual({
+      ok: true,
+      formatted: "[12345678901234567890]",
+    });
+  });
+
+  it("不正なJSONはエラーを返す", () => {
+    const result = minifyJson('{"a":1');
+    expect(result.ok).toBe(false);
   });
 });

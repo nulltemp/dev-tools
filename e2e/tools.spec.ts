@@ -6,6 +6,16 @@ test.describe("文字数カウンター", () => {
     await page.getByLabel("文字数を数えるテキスト").fill("こんにちは👨‍👩‍👧");
     await expect(page.getByText("文字数", { exact: true }).locator("..")).toHaveText("文字数6");
   });
+
+  test("空白・改行を除いた文字数、行数、バイト数を表示する", async ({ page }) => {
+    await page.goto("/char-count");
+    await page.getByLabel("文字数を数えるテキスト").fill("あい う\nab");
+    const stat = (label: string) => page.getByText(label, { exact: true }).locator("..");
+    await expect(stat("文字数")).toHaveText("文字数7");
+    await expect(stat("空白・改行を除いた文字数")).toHaveText("空白・改行を除いた文字数5");
+    await expect(stat("行数")).toHaveText("行数2");
+    await expect(stat("バイト数（UTF-8）")).toHaveText("バイト数（UTF-8）13");
+  });
 });
 
 test.describe("JSON整形", () => {
@@ -22,6 +32,26 @@ test.describe("JSON整形", () => {
     await result.getByRole("button", { name: "整形結果をコピー" }).click();
     await expect(result.getByRole("button", { name: "コピーしました" })).toBeVisible();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
+  });
+
+  test("インデント幅を選び、Ctrl+Enter で整形できる", async ({ page }) => {
+    await page.goto("/json-formatter");
+    await page.getByRole("button", { name: "4スペース" }).click();
+    const input = page.getByLabel("整形するJSON");
+    await input.fill('{"a":[1]}');
+    await input.press("Control+Enter");
+    const result = resultBlock(page, "整形結果");
+    await expect(result.locator("pre")).toHaveText('{\n    "a": [\n        1\n    ]\n}');
+
+    await page.getByRole("button", { name: "2スペース" }).click();
+    await expect(result.locator("pre")).toHaveText('{\n  "a": [\n    1\n  ]\n}');
+  });
+
+  test("圧縮した結果を表示する", async ({ page }) => {
+    await page.goto("/json-formatter");
+    await page.getByLabel("整形するJSON").fill('{\n  "a": 1,\n  "b": [ true ]\n}');
+    await page.getByRole("button", { name: "圧縮" }).click();
+    await expect(resultBlock(page, "圧縮結果").locator("pre")).toHaveText('{"a":1,"b":[true]}');
   });
 
   test("不正なJSONはエラーを表示し、入力を変えると消える", async ({ page }) => {
