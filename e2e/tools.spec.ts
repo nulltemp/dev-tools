@@ -76,6 +76,13 @@ test.describe("Unixタイムスタンプ変換", () => {
     await expect(definition(page, "UTC")).toHaveText("1970-01-20 16:13:20");
   });
 
+  test("マイクロ秒の値を桁数から自動判定する", async ({ page }) => {
+    await page.goto("/unix-timestamp");
+    await page.getByLabel("変換するUnixタイムスタンプ").fill("1700000000000000");
+    await expect(definition(page, "UTC")).toHaveText("2023-11-14 22:13:20");
+    await expect(page.getByText("マイクロ秒として解釈しました")).toBeVisible();
+  });
+
   test("日時をタイムスタンプに変換する(タイムゾーンを切り替えられる)", async ({ page }) => {
     await page.goto("/unix-timestamp");
     await page.getByLabel("変換する日時").fill("2023-11-15 07:13:20");

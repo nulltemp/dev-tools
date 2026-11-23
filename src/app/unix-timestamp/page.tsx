@@ -19,6 +19,7 @@ import {
   formatRelative,
   parseDateTime,
   parseTimestamp,
+  TIMESTAMP_UNIT_LABELS,
   type TimestampUnit,
 } from "./timestamp";
 
@@ -199,6 +200,8 @@ export default function UnixTimestampPage() {
                 <ToggleButton value="auto">自動判定</ToggleButton>
                 <ToggleButton value="seconds">秒</ToggleButton>
                 <ToggleButton value="milliseconds">ミリ秒</ToggleButton>
+                <ToggleButton value="microseconds">マイクロ秒</ToggleButton>
+                <ToggleButton value="nanoseconds">ナノ秒</ToggleButton>
               </ToggleButtonGroup>
               <Button variant="outlined" onClick={handleTimestampNow} sx={{ flexShrink: 0 }}>
                 現在時刻
@@ -228,7 +231,7 @@ export default function UnixTimestampPage() {
               />
               {unit === "auto" && (
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {timestampResult.unit === "seconds" ? "秒" : "ミリ秒"}
+                  {TIMESTAMP_UNIT_LABELS[timestampResult.unit]}
                   として解釈しました(桁数から自動判定)
                 </Typography>
               )}
