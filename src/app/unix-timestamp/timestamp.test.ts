@@ -20,6 +20,9 @@ describe("parseTimestamp", () => {
     ["負の秒", "-86400", "seconds", -86400000],
     ["小数の秒", "1700000000.5", "seconds", 1700000000500],
     ["前後の空白", "  1700000000\n", "seconds", 1700000000000],
+    ["マイクロ秒", "1700000000123456", "microseconds", 1700000000123],
+    ["ナノ秒", "1700000000123456789", "nanoseconds", 1700000000123],
+    ["負のマイクロ秒", "-1700000000000001", "microseconds", -1700000000001],
   ])("自動のとき%sとして解釈する", (_, input, unit, ms) => {
     expect(parseTimestamp(input)).toEqual({ ok: true, unit, date: new Date(ms) });
   });
@@ -33,6 +36,26 @@ describe("parseTimestamp", () => {
     expect(parseTimestamp("9000000000000", "seconds")).toEqual({
       ok: false,
       error: "日時として表せる範囲を超えています",
+    });
+  });
+
+  it("マイクロ秒・ナノ秒も単位を指定して解釈できる", () => {
+    expect(parseTimestamp("1700000000", "microseconds")).toEqual({
+      ok: true,
+      unit: "microseconds",
+      date: new Date(1700000),
+    });
+    expect(parseTimestamp("1700000000000", "nanoseconds")).toEqual({
+      ok: true,
+      unit: "nanoseconds",
+      date: new Date(1700000),
+    });
+  });
+
+  it("ナノ秒の19桁を精度を落とさずに扱う", () => {
+    // Number にすると 1700000000123456800 に丸まる値
+    expect(parseTimestamp("1700000000123999999")).toMatchObject({
+      date: new Date(1700000000123),
     });
   });
 
@@ -53,8 +76,11 @@ describe("parseTimestamp", () => {
   );
 
   it("Date で表せる上限ちょうどは受け付け、それを超えるとエラー", () => {
-    expect(parseTimestamp("8640000000000000").ok).toBe(true);
-    expect(parseTimestamp("8640000000000001").ok).toBe(false);
+    expect(parseTimestamp("8640000000000000", "milliseconds").ok).toBe(true);
+    expect(parseTimestamp("8640000000000001", "milliseconds").ok).toBe(false);
+    expect(parseTimestamp("8640000000000000.5", "milliseconds").ok).toBe(false);
+    expect(parseTimestamp("8640000000000000000000", "nanoseconds").ok).toBe(true);
+    expect(parseTimestamp("8640000000000000000001", "nanoseconds").ok).toBe(false);
   });
 });
 
@@ -161,6 +187,17 @@ describe("parseDateTime", () => {
     expect(parseDateTime(input, TOKYO)).toEqual({
       ok: false,
       error: "存在しない日時です",
+    });
+  });
+
+  it.each([
+    ["分が60以上", "2026-11-17 12:00:00+09:75"],
+    ["時が24以上", "2026-11-17 12:00:00+99:00"],
+    ["コロンなしで分が60以上", "2026-11-17 12:00:00-0060"],
+  ])("存在しないオフセット(%s)はエラーを返す", (_, input) => {
+    expect(parseDateTime(input, UTC)).toEqual({
+      ok: false,
+      error: "存在しないオフセットです",
     });
   });
 

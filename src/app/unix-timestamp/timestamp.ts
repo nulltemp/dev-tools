@@ -1,40 +1,78 @@
-export type TimestampUnit = "auto" | "seconds" | "milliseconds";
+export type ResolvedTimestampUnit = "seconds" | "milliseconds" | "microseconds" | "nanoseconds";
+export type TimestampUnit = "auto" | ResolvedTimestampUnit;
 
 export type ParseTimestampResult =
-  | { ok: true; date: Date; unit: "seconds" | "milliseconds" }
+  | { ok: true; date: Date; unit: ResolvedTimestampUnit }
   | { ok: false; error: string };
 
 export type ParseDateTimeResult =
   | { ok: true; date: Date }
   | { ok: false; error: string };
 
+export const TIMESTAMP_UNIT_LABELS: Record<ResolvedTimestampUnit, string> = {
+  seconds: "秒",
+  milliseconds: "ミリ秒",
+  microseconds: "マイクロ秒",
+  nanoseconds: "ナノ秒",
+};
+
 // Date で表せる範囲(1970-01-01 から前後1億日)
-const MAX_MS = 8.64e15;
-// 「自動」のときこの絶対値以上ならミリ秒とみなす。
+// tsconfig の target が ES2017 で BigInt リテラル(0n など)を書けないため、BigInt() で作る
+const ZERO = BigInt(0);
+const ONE = BigInt(1);
+const TEN = BigInt(10);
+const MAX_MS = BigInt(8.64e15);
+
+// 1単位をミリ秒に直すときの 10 の指数(秒なら ×10³、ナノ秒なら ×10⁻⁶)
+const MS_EXPONENT: Record<ResolvedTimestampUnit, number> = {
+  seconds: 3,
+  milliseconds: 0,
+  microseconds: -3,
+  nanoseconds: -6,
+};
+
+// 「自動」のとき、絶対値がこの値以上なら大きい単位から順にその単位とみなす。
 // 1e11 秒は西暦5138年、1e11 ミリ秒は1973年なので、普段使う値ならどちらとも取り違えない
-const AUTO_MS_THRESHOLD = 1e11;
+// (マイクロ秒・ナノ秒も同じく 1000 倍ずつ)
+const AUTO_THRESHOLDS: [number, ResolvedTimestampUnit][] = [
+  [1e17, "nanoseconds"],
+  [1e14, "microseconds"],
+  [1e11, "milliseconds"],
+];
+
+const resolveAutoUnit = (value: number): ResolvedTimestampUnit =>
+  AUTO_THRESHOLDS.find(([threshold]) => Math.abs(value) >= threshold)?.[1] ?? "seconds";
+
+// 負の数でも過去方向へ丸める整数の割り算
+const floorDiv = (a: bigint, b: bigint): bigint => {
+  const q = a / b;
+  return a % b !== ZERO && a < ZERO !== b < ZERO ? q - ONE : q;
+};
 
 export const parseTimestamp = (
   input: string,
   unit: TimestampUnit = "auto"
 ): ParseTimestampResult => {
   const text = input.trim();
-  if (!/^-?\d+(\.\d+)?$/.test(text)) {
+  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(text);
+  if (!match) {
     return { ok: false, error: "数値(例: 1700000000)を入力してください" };
   }
-  const value = Number(text);
-  const resolved =
-    unit === "auto"
-      ? Math.abs(value) >= AUTO_MS_THRESHOLD
-        ? "milliseconds"
-        : "seconds"
-      : unit;
-  const ms = resolved === "seconds" ? value * 1000 : value;
-  if (!(Math.abs(ms) <= MAX_MS)) {
+  const [, sign, intPart, fracPart = ""] = match;
+  const resolved = unit === "auto" ? resolveAutoUnit(Number(text)) : unit;
+
+  // ナノ秒の19桁は Number の精度を超えるので、BigInt で 値 × 10^exponent を正確に求める
+  // (value = digits / 10^fracPart.length)
+  const exponent = MS_EXPONENT[resolved];
+  const digits = BigInt(sign + intPart + fracPart);
+  const numerator = digits * TEN ** BigInt(Math.max(exponent, 0));
+  const denominator = TEN ** BigInt(fracPart.length + Math.max(-exponent, 0));
+  const absNumerator = numerator < ZERO ? -numerator : numerator;
+  if (absNumerator > MAX_MS * denominator) {
     return { ok: false, error: "日時として表せる範囲を超えています" };
   }
   // ミリ秒未満は Date で扱えないので切り捨てる(負の値でも過去方向へ)
-  return { ok: true, date: new Date(Math.floor(ms)), unit: resolved };
+  return { ok: true, date: new Date(Number(floorDiv(numerator, denominator))), unit: resolved };
 };
 
 const pad = (n: number, width = 2) => String(n).padStart(width, "0");
@@ -179,12 +217,15 @@ export const parseDateTime = (
   }
 
   if (offset) {
+    if (offset.toUpperCase() === "Z") return { ok: true, date: new Date(utcMs) };
+    const offsetHours = Number(offset.slice(1, 3));
+    const offsetMinutes = Number(offset.slice(-2));
+    // ISO 8601 の範囲(時 00〜23、分 00〜59)を超えるものは受け付けない
+    if (offsetHours > 23 || offsetMinutes > 59) {
+      return { ok: false, error: "存在しないオフセットです" };
+    }
     const offsetMs =
-      offset.toUpperCase() === "Z"
-        ? 0
-        : (offset[0] === "-" ? -1 : 1) *
-          (Number(offset.slice(1, 3)) * 60 + Number(offset.slice(-2))) *
-          60_000;
+      (offset[0] === "-" ? -1 : 1) * (offsetHours * 60 + offsetMinutes) * 60_000;
     return { ok: true, date: new Date(utcMs - offsetMs) };
   }
 
