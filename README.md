@@ -49,4 +49,4 @@ npm run test:e2e
 
 詳細なアーキテクチャ方針は [CLAUDE.md](./CLAUDE.md) を参照してください。
 
-未対応の改善点は [docs/TODO.md](./docs/TODO.md) にまとめています。
+未対応の改善点は [GitHub の Issue](https://github.com/nulltemp/dev-tools/issues) で管理しています。
