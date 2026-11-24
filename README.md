@@ -13,6 +13,7 @@ https://dev-tools.nulltemp.com
 - Base64エンコード・デコード (`/base64`) — テキストをBase64にエンコード、Base64をテキストにデコードします
 - URLエンコード・デコード (`/url-encode`) — テキストをパーセントエンコード、またはデコードします
 - UUID生成 (`/uuid`) — UUID(v4・v7)をまとめて生成します
+- ハッシュ生成 (`/hash`) — テキストのSHA-1・SHA-256・SHA-384・SHA-512ハッシュ(HMACも)を計算します
 
 ## Getting Started
 
