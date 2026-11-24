@@ -11,6 +11,7 @@ import CodeBlock from "../CodeBlock";
 import ToolPage from "../ToolPage";
 import { monoInput } from "../inputStyles";
 import { findTool } from "../tools";
+import { toolGuides } from "../toolGuides";
 import {
   formatDigest,
   HASH_ALGORITHMS,
@@ -68,6 +69,7 @@ export default function HashPage() {
   return (
     <ToolPage
       title={name}
+      guide={toolGuides["/hash"]}
       description={`${description}。テキストは UTF-8 としてハッシュします。ブラウザの Web Crypto で計算し、入力は送信されません(MD5 は Web Crypto にないため対応していません)。`}
     >
       <Stack spacing={2}>

@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { toolJsonLd, toolMetadata, tools } from "./tools";
+import { toolGuides } from "./toolGuides";
 
 describe("tools", () => {
   it("hrefが重複していない", () => {
@@ -49,5 +50,18 @@ describe("toolJsonLd", () => {
       url: "https://dev-tools.nulltemp.com/jwt-decoder",
       applicationCategory: "DeveloperApplication",
     });
+  });
+});
+
+describe("toolGuides", () => {
+  it.each(tools.map((t) => [t.href]))("%s に使い方と用語の解説がある", (href) => {
+    const guide = toolGuides[href];
+    expect(guide?.usage.length).toBeGreaterThan(0);
+    expect(guide?.terms.length).toBeGreaterThan(0);
+  });
+
+  it("ツール一覧にないページの解説はない", () => {
+    const hrefs = new Set(tools.map((t) => t.href));
+    expect(Object.keys(toolGuides).filter((href) => !hrefs.has(href))).toEqual([]);
   });
 });

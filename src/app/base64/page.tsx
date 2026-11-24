@@ -2,6 +2,7 @@
 import EncodeDecodeTool from "../EncodeDecodeTool";
 import ToolPage from "../ToolPage";
 import { findTool } from "../tools";
+import { toolGuides } from "../toolGuides";
 import { decodeBase64, encodeBase64 } from "./base64";
 
 const { name, description } = findTool("/base64");
@@ -10,6 +11,7 @@ export default function Base64Page() {
   return (
     <ToolPage
       title={name}
+      guide={toolGuides["/base64"]}
       description={`${description}。日本語などは UTF-8 として扱います。入力はブラウザ内で変換され、送信されません。`}
     >
       <EncodeDecodeTool

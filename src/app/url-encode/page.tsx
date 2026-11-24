@@ -2,6 +2,7 @@
 import EncodeDecodeTool from "../EncodeDecodeTool";
 import ToolPage from "../ToolPage";
 import { findTool } from "../tools";
+import { toolGuides } from "../toolGuides";
 import { decodeUrl, encodeUrl } from "./urlEncode";
 
 const { name, description } = findTool("/url-encode");
@@ -10,6 +11,7 @@ export default function UrlEncodePage() {
   return (
     <ToolPage
       title={name}
+      guide={toolGuides["/url-encode"]}
       description={`${description}。クエリパラメーターの値などに使う形式(encodeURIComponent 相当)です。入力はブラウザ内で変換され、送信されません。`}
     >
       <EncodeDecodeTool

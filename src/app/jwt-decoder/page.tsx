@@ -10,6 +10,7 @@ import CodeBlock from "../CodeBlock";
 import ToolPage from "../ToolPage";
 import { monoInput } from "../inputStyles";
 import { findTool } from "../tools";
+import { toolGuides } from "../toolGuides";
 import { decodeJwt, type DecodedJwt } from "./decodeJwt";
 
 const { name, description } = findTool("/jwt-decoder");
@@ -90,7 +91,7 @@ export default function JwtDecoderPage() {
   };
 
   return (
-    <ToolPage title={name} description={description}>
+    <ToolPage title={name} description={description} guide={toolGuides["/jwt-decoder"]}>
       <Stack spacing={2}>
         <Alert severity="info" variant="outlined">
           入力したJWTはブラウザ内でデコードされ、どこにも送信されません。
