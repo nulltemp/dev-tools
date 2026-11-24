@@ -1,4 +1,5 @@
 import { findJsonError } from "../json-formatter/findJsonError";
+import { formatJson } from "../json-formatter/formatJson";
 
 export type TimeClaim = "exp" | "nbf" | "iat";
 
@@ -62,14 +63,20 @@ export const decodeBase64UrlSegment = (segment: string): SegmentDecodeResult => 
   }
 };
 
-type JsonPartResult = { ok: true; value: unknown } | { ok: false; error: string };
+type JsonPartResult =
+  | { ok: true; value: unknown; formatted: string }
+  | { ok: false; error: string };
 
 // ヘッダーかペイロードを Base64URL → UTF-8 → JSON の順に読み、失敗したらどの部分の何が原因かを返す
 const decodeJsonPart = (segment: string, label: string): JsonPartResult => {
   const decoded = decodeBase64UrlSegment(segment);
   if (!decoded.ok) return { ok: false, error: `${label}: ${decoded.reason}` };
   try {
-    return { ok: true, value: JSON.parse(decoded.text) };
+    const value: unknown = JSON.parse(decoded.text);
+    // 表示は JSON.stringify で作り直さず、元のテキストの空白だけを整える。
+    // 値を経由すると大きな整数の桁・1.0 などの表記・重複キーが変わり、トークンの中身と食い違うため
+    const formatted = formatJson(decoded.text);
+    return { ok: true, value, formatted: formatted.ok ? formatted.formatted : decoded.text };
   } catch {
     const location = findJsonError(decoded.text);
     return {
@@ -121,8 +128,8 @@ export const decodeJwt = (
   return {
     ok: true,
     decoded: {
-      header: JSON.stringify(header.value, null, 2),
-      payload: JSON.stringify(payloadObj, null, 2),
+      header: header.formatted,
+      payload: payload.formatted,
       signature: parts[2],
       expiresAt: toDate(expMs),
       notBefore: toDate(nbfMs),

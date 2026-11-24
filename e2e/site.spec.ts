@@ -47,6 +47,19 @@ test.describe("サイト全体", () => {
     await expect(link).toHaveAttribute("target", "_blank");
   });
 
+  test("最初の Tab でスキップリンクにフォーカスし、Enter で本文に移る", async ({ page }) => {
+    await page.goto(tools[0].href);
+    const skip = page.getByRole("link", { name: "本文へスキップ" });
+    await page.keyboard.press("Tab");
+    await expect(skip).toBeFocused();
+    await expect(skip).toBeInViewport();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("main")).toBeFocused();
+    // 次の Tab はナビを飛ばして本文の中に進む
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => !!document.activeElement?.closest("main"))).toBe(true);
+  });
+
   test("404ページを表示し、一覧に戻れる", async ({ page }) => {
     // ホスティングは存在しないURLに 404.html を返す(vite preview はそうしないので直接開く)
     await page.goto("/404.html");

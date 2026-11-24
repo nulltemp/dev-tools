@@ -90,6 +90,23 @@ describe("decodeJwt", () => {
     });
   });
 
+  it("大きな整数・数値の表記・重複キーをトークンの中身のまま表示する", () => {
+    const raw = '{"sub":12345678901234567890,"amount":1.0,"a":1,"a":2,"exp":1e10}';
+    const payload = Buffer.from(raw).toString("base64url");
+    const result = decodeJwt(`${encode({ alg: "HS256" })}.${payload}.sig`, NOW);
+    expect(result).toMatchObject({
+      ok: true,
+      decoded: {
+        header: '{\n  "alg": "HS256"\n}',
+        payload:
+          '{\n  "sub": 12345678901234567890,\n  "amount": 1.0,\n  "a": 1,\n  "a": 2,\n  "exp": 1e10\n}',
+        // 期限の判定は値として読んだ数値を使う
+        expiresAt: new Date(1e13),
+        isExpired: false,
+      },
+    });
+  });
+
   it("前後の空白や改行を無視する", () => {
     const result = decodeJwt(`\n  ${makeJwt({ sub: "1" })}  \n`, NOW);
     expect(result.ok).toBe(true);
