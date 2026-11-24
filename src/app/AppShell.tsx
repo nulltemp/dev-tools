@@ -108,6 +108,29 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      {/* キーボード操作でナビを毎回たどらずに済むよう、最初の Tab で本文へ飛べるようにする(WCAG 2.4.1)。
+          普段は画面外に置き、フォーカスされたときだけ表示する */}
+      <Box
+        component="a"
+        href="#main"
+        sx={{
+          position: "absolute",
+          left: 8,
+          top: 8,
+          zIndex: "tooltip",
+          px: 2,
+          py: 1,
+          borderRadius: 1,
+          bgcolor: "background.paper",
+          color: "primary.main",
+          boxShadow: 3,
+          fontWeight: 700,
+          transform: "translateY(-200%)",
+          "&:focus": { transform: "none" },
+        }}
+      >
+        本文へスキップ
+      </Box>
       <AppBar
         position="fixed"
         color="inherit"
@@ -159,7 +182,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <Box
         component="main"
-        sx={{ flex: 1, minWidth: 0, px: { xs: 2, sm: 3, md: 5 }, py: { xs: 3, md: 5 } }}
+        id="main"
+        tabIndex={-1}
+        sx={{ flex: 1, minWidth: 0, outline: "none", px: { xs: 2, sm: 3, md: 5 }, py: { xs: 3, md: 5 } }}
       >
         {/* 狭い画面で固定の AppBar に隠れないよう、その高さぶん空ける */}
         <Toolbar sx={{ display: { md: "none" } }} />
