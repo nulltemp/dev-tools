@@ -219,3 +219,38 @@ test.describe("UUID生成", () => {
     await expect(resultBlock(page, /生成結果/)).toHaveCount(0);
   });
 });
+
+test.describe("ハッシュ生成", () => {
+  test("SHA-256 などを計算し、出力形式を切り替えられる", async ({ page }) => {
+    await page.goto("/hash");
+    await page.getByLabel("ハッシュを計算するテキスト").fill("abc");
+    const sha256 = resultBlock(page, "SHA-256").locator("pre");
+    await expect(sha256).toHaveText(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
+    await expect(resultBlock(page, "SHA-1").locator("pre")).toHaveText(
+      "a9993e364706816aba3e25717850c26c9cd0d89d"
+    );
+
+    await page.getByRole("button", { name: "16進(大文字)" }).click();
+    await expect(sha256).toHaveText(
+      "BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD"
+    );
+    await page.getByRole("button", { name: "Base64" }).click();
+    await expect(sha256).toHaveText("ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=");
+  });
+
+  test("HMAC を計算し、入力を消すと結果も消える", async ({ page }) => {
+    await page.goto("/hash");
+    const input = page.getByLabel("ハッシュを計算するテキスト");
+    await input.fill("what do ya want for nothing?");
+    await page.getByLabel("HMAC", { exact: true }).check();
+    await page.getByLabel("HMACの秘密鍵").fill("Jefe");
+    await expect(resultBlock(page, "HMAC-SHA-256").locator("pre")).toHaveText(
+      "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
+    );
+
+    await input.fill("");
+    await expect(resultBlock(page, "HMAC-SHA-256")).toHaveCount(0);
+  });
+});
