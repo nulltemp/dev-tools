@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import ToolPage from "../ToolPage";
 import { findTool } from "../tools";
+import { toolGuides } from "../toolGuides";
 import {
   countGraphemes,
   countGraphemesWithoutWhitespace,
@@ -29,7 +30,7 @@ export default function CharCounterPage() {
   );
 
   return (
-    <ToolPage title={name} description={description}>
+    <ToolPage title={name} description={description} guide={toolGuides["/char-count"]}>
       <Stack spacing={2}>
         <TextField
           multiline

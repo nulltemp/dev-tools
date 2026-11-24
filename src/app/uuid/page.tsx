@@ -13,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import CodeBlock from "../CodeBlock";
 import ToolPage from "../ToolPage";
 import { findTool } from "../tools";
+import { toolGuides } from "../toolGuides";
 import { clampCount, formatUuid, generateUuids, MAX_COUNT, type UuidVersion } from "./uuid";
 
 const { name, description } = findTool("/uuid");
@@ -48,6 +49,7 @@ export default function UuidPage() {
   return (
     <ToolPage
       title={name}
+      guide={toolGuides["/uuid"]}
       description={`${description}。ブラウザの暗号論的乱数(crypto.getRandomValues)を使い、生成した値は送信されません。`}
     >
       <Stack spacing={2}>

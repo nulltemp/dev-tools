@@ -80,6 +80,16 @@ test.describe("サイト全体", () => {
       expect(overflow).toBeLessThanOrEqual(0);
     });
   }
+
+  for (const { href, name } of tools) {
+    test(`${name}: 使い方と用語の解説がある`, async ({ page }) => {
+      await page.goto(href);
+      const guide = page.getByRole("complementary", { name: "使い方と用語の解説" });
+      await expect(guide.getByRole("heading", { level: 2, name: "使い方" })).toBeVisible();
+      await expect(guide.getByRole("heading", { level: 2, name: "用語の解説" })).toBeVisible();
+      await expect(guide.locator("dt").first()).toBeVisible();
+    });
+  }
 });
 
 test.describe("配色", () => {

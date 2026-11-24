@@ -13,6 +13,7 @@ import CopyButton from "../CopyButton";
 import ToolPage from "../ToolPage";
 import { monoInput } from "../inputStyles";
 import { findTool } from "../tools";
+import { toolGuides } from "../toolGuides";
 import {
   formatDateTime,
   formatIso,
@@ -162,6 +163,7 @@ export default function UnixTimestampPage() {
   return (
     <ToolPage
       title={name}
+      guide={toolGuides["/unix-timestamp"]}
       description={
         <>
           {description}。日時はブラウザのタイムゾーン

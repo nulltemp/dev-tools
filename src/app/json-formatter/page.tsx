@@ -12,6 +12,7 @@ import CodeBlock from "../CodeBlock";
 import ToolPage from "../ToolPage";
 import { monoInput } from "../inputStyles";
 import { findTool } from "../tools";
+import { toolGuides } from "../toolGuides";
 import { formatJson, minifyJson, type FormatJsonResult, type IndentKey } from "./formatJson";
 
 const { name, description } = findTool("/json-formatter");
@@ -55,7 +56,7 @@ export default function JsonFormatterPage() {
   };
 
   return (
-    <ToolPage title={name} description={description}>
+    <ToolPage title={name} description={description} guide={toolGuides["/json-formatter"]}>
       <Stack spacing={2}>
         <TextField
           multiline
