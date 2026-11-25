@@ -22,6 +22,16 @@ export const formatDigest = (bytes: Uint8Array, format: DigestFormat): string =>
 };
 
 // Web Crypto(crypto.subtle)で計算するので、入力はどこにも送られない
+// Web Crypto(crypto.subtle)が使えるか。HTTP など安全でないコンテキストでは undefined になる
+export const isWebCryptoAvailable = (): boolean =>
+  typeof crypto !== "undefined" && crypto.subtle !== undefined;
+
+// 計算に失敗したときの表示用メッセージ。Web Crypto 非対応とそれ以外を分ける
+export const hashErrorMessage = (error: unknown): string =>
+  isWebCryptoAvailable()
+    ? `ハッシュを計算できませんでした(${error instanceof Error ? error.message : String(error)})。`
+    : "ハッシュを計算できませんでした。ブラウザが Web Crypto に対応していない可能性があります。";
+
 export const digest = async (algorithm: HashAlgorithm, text: string): Promise<Uint8Array> =>
   new Uint8Array(await crypto.subtle.digest(algorithm, utf8(text)));
 
@@ -41,6 +51,7 @@ export const hmac = async (
 };
 
 // すべてのアルゴリズムの結果をまとめて返す。key を渡すと HMAC にする
+// (Web Crypto は長さ0の HMAC 鍵を受け付けないので、空の key は呼び出し側で弾く)
 export const hashAll = async (
   text: string,
   key?: string
