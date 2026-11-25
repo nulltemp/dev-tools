@@ -6,7 +6,7 @@ export const PRIVACY_POLICY_URL = "https://nulltemp.com/privacy/";
 export const KOFI_URL = "https://ko-fi.com/nulltemp";
 export const GITHUB_URL = "https://github.com/nulltemp/dev-tools";
 export const SITE_DESCRIPTION =
-  "JSON整形、JWTデコーダー、Base64・URLエンコード、UUID生成、ハッシュ生成(SHA-256)、Unixタイムスタンプ変換など、開発に便利なツール集";
+  "JSON整形、JWTデコーダー、Base64・URLエンコード、UUID生成、ハッシュ生成(SHA-256)、Unixタイムスタンプ変換、テキスト差分など、開発に便利なツール集";
 
 // 静的ホスティングで Content-Type が正しく付くよう拡張子付きの静的画像を使う
 export const OG_IMAGE = {
@@ -63,6 +63,11 @@ export const tools: Tool[] = [
     href: "/hash",
     name: "ハッシュ生成",
     description: "テキストのSHA-1・SHA-256・SHA-384・SHA-512ハッシュ(HMACも)を計算します",
+  },
+  {
+    href: "/diff",
+    name: "テキスト差分",
+    description: "2つのテキストの差分(diff)を行単位で表示し、変更された文字も強調します",
   },
 ];
 

@@ -264,3 +264,44 @@ test.describe("ハッシュ生成", () => {
     await expect(resultBlock(page, "HMAC-SHA-256")).toHaveCount(0);
   });
 });
+
+test.describe("テキスト差分", () => {
+  test("追加・削除された行と変更された文字を表示し、unified diff でコピーできる", async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await page.goto("/diff");
+    await page.getByLabel("変更前のテキスト").fill("host: a\nport: 8080\nold");
+    await page.getByLabel("変更後のテキスト").fill("host: a\nport: 8081");
+
+    const result = resultBlock(page, "差分");
+    await expect(result.getByText("追加 1 行・削除 2 行")).toBeVisible();
+    const rows = result.locator("tbody tr");
+    await expect(rows).toHaveText(["11host: a", "2-port: 8080", "3-old", "2+port: 8081"]);
+    await expect(rows.nth(1).locator("mark")).toHaveText("0");
+    await expect(rows.nth(3).locator("mark")).toHaveText("1");
+
+    await result.getByRole("button", { name: "unified diff 形式でコピー" }).click();
+    await expect(result.getByRole("button", { name: "コピーしました" })).toBeVisible();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      "--- 変更前\n+++ 変更後\n@@ -1,3 +1,2 @@\n host: a\n-port: 8080\n-old\n+port: 8081\n"
+    );
+  });
+
+  test("空白・大文字小文字の違いを無視でき、差分がなければそう表示する", async ({ page }) => {
+    await page.goto("/diff");
+    await page.getByLabel("変更前のテキスト").fill("Hello  World");
+    await page.getByLabel("変更後のテキスト").fill("hello world");
+    await expect(resultBlock(page, "差分").getByText("追加 1 行・削除 1 行")).toBeVisible();
+
+    await page.getByLabel("空白の違いを無視").check();
+    await page.getByLabel("大文字・小文字を無視").check();
+    await expect(page.getByText("差分はありません。")).toBeVisible();
+    await expect(resultBlock(page, "差分")).toHaveCount(0);
+
+    await page.getByLabel("変更前のテキスト").fill("");
+    await page.getByLabel("変更後のテキスト").fill("");
+    await expect(page.getByText("差分はありません。")).toHaveCount(0);
+  });
+});
