@@ -14,6 +14,7 @@ https://dev-tools.nulltemp.com
 - URLエンコード・デコード (`/url-encode`) — テキストをパーセントエンコード、またはデコードします
 - UUID生成 (`/uuid`) — UUID(v4・v7)をまとめて生成します
 - ハッシュ生成 (`/hash`) — テキストのSHA-1・SHA-256・SHA-384・SHA-512ハッシュ(HMACも)を計算します
+- テキスト差分 (`/diff`) — 2つのテキストの差分(diff)を行単位で表示し、変更された文字も強調します
 
 ## Getting Started
 

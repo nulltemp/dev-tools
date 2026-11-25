@@ -22,7 +22,7 @@ E2E tests (Playwright, `playwright.config.ts`) live in `e2e/` and run against `o
 
 ## Architecture
 
-This is a Next.js (App Router) collection of small, independent developer utility tools ("デベロッパーツール"), deployed at https://dev-tools.nulltemp.com. Currently available tools: 文字数カウンター (`src/app/char-count`), JSON整形 (`src/app/json-formatter`), JWTデコーダー (`src/app/jwt-decoder`), Unixタイムスタンプ変換 (`src/app/unix-timestamp`), Base64エンコード・デコード (`src/app/base64`), URLエンコード・デコード (`src/app/url-encode`), UUID生成 (`src/app/uuid`), and ハッシュ生成 (`src/app/hash`).
+This is a Next.js (App Router) collection of small, independent developer utility tools ("デベロッパーツール"), deployed at https://dev-tools.nulltemp.com. Currently available tools: 文字数カウンター (`src/app/char-count`), JSON整形 (`src/app/json-formatter`), JWTデコーダー (`src/app/jwt-decoder`), Unixタイムスタンプ変換 (`src/app/unix-timestamp`), Base64エンコード・デコード (`src/app/base64`), URLエンコード・デコード (`src/app/url-encode`), UUID生成 (`src/app/uuid`), ハッシュ生成 (`src/app/hash`), and テキスト差分 (`src/app/diff`).
 
 - **Adding a new tool**:
   1. create `src/app/<tool-name>/page.tsx` (client component)
