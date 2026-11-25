@@ -16,6 +16,7 @@ import {
   formatDigest,
   HASH_ALGORITHMS,
   hashAll,
+  hashErrorMessage,
   type DigestFormat,
   type HashAlgorithm,
 } from "./hash";
@@ -43,28 +44,25 @@ export default function HashPage() {
   const [computed, setComputed] = useState<Computed | null>(null);
 
   const key = useHmac ? hmacKey : undefined;
+  // Web Crypto は長さ0の HMAC 鍵を受け付けないので、鍵が入力されるまで計算しない
+  const needsKey = key === "";
 
   useEffect(() => {
-    if (!input) return;
+    if (!input || needsKey) return;
     // 計算中に入力が変わったら、古い結果で上書きしない
     let cancelled = false;
     hashAll(input, key).then(
       (digests) => !cancelled && setComputed({ text: input, key, digests }),
-      () =>
-        !cancelled &&
-        setComputed({
-          text: input,
-          key,
-          error: "ハッシュを計算できませんでした。ブラウザが Web Crypto に対応していない可能性があります。",
-        })
+      (error: unknown) =>
+        !cancelled && setComputed({ text: input, key, error: hashErrorMessage(error) })
     );
     return () => {
       cancelled = true;
     };
-  }, [input, key]);
+  }, [input, key, needsKey]);
 
   // 今の入力に対して計算した結果だけを表示する(入力を変えたら古い結果は出さない)
-  const current = input && computed?.text === input && computed.key === key ? computed : null;
+  const current = input && !needsKey && computed?.text === input && computed.key === key ? computed : null;
 
   return (
     <ToolPage
@@ -118,10 +116,15 @@ export default function HashPage() {
             size="small"
             value={hmacKey}
             onChange={(e) => setHmacKey(e.target.value)}
+            // チェックを入れたらそのまま鍵を入力できるようにする
+            autoFocus
             placeholder="秘密鍵(UTF-8 のテキストとして使います)"
             slotProps={{ htmlInput: { "aria-label": "HMACの秘密鍵" } }}
             sx={monoInput}
           />
+        )}
+        {needsKey && input && (
+          <Alert severity="info">HMAC を計算するには秘密鍵を入力してください。</Alert>
         )}
         {current?.error && <Alert severity="error">{current.error}</Alert>}
         {current?.digests &&

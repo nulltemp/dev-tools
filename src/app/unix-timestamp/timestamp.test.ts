@@ -160,6 +160,45 @@ describe("parseDateTime", () => {
     expect(parseDateTime(input, TOKYO)).toEqual({ ok: true, date: new Date(ms) });
   });
 
+  it.each([
+    ["Python の isoformat(マイクロ秒)", "2026-11-17T12:00:00.123456+00:00", Date.UTC(2026, 10, 17, 12, 0, 0, 123)],
+    ["Go の RFC3339Nano(ナノ秒)", "2026-11-17T12:00:00.123456789Z", Date.UTC(2026, 10, 17, 12, 0, 0, 123)],
+    ["PostgreSQL の timestamptz(時だけのオフセット)", "2026-11-17 12:00:00.123456+09", Date.UTC(2026, 10, 17, 3, 0, 0, 123)],
+    ["時だけの負のオフセット", "2026-11-17T12:00-05", Date.UTC(2026, 10, 17, 17)],
+    ["コロンなしのオフセット", "2026-11-17T12:00+0930", Date.UTC(2026, 10, 17, 2, 30)],
+  ])("%s を読める(ミリ秒未満は切り捨て)", (_, input, ms) => {
+    expect(parseDateTime(input, TOKYO)).toEqual({ ok: true, date: new Date(ms) });
+  });
+
+  it("小数秒が4桁以上でもオフセットがなければタイムゾーンで解釈する", () => {
+    expect(parseDateTime("2026-11-17 12:00:00.9999", TOKYO)).toEqual({
+      ok: true,
+      date: new Date(Date.UTC(2026, 10, 17, 3, 0, 0, 999)),
+    });
+  });
+
+  it("夏時間の切り替えで存在しない時刻はエラーにする", () => {
+    expect(parseDateTime("2026-03-08 02:30", NEW_YORK)).toEqual({
+      ok: false,
+      error: "夏時間の切り替えで存在しない時刻です",
+    });
+    // 直前・直後の時刻は読める
+    expect(parseDateTime("2026-03-08 01:59", NEW_YORK)).toEqual({
+      ok: true,
+      date: new Date(Date.UTC(2026, 2, 8, 6, 59)),
+    });
+    expect(parseDateTime("2026-03-08 03:00", NEW_YORK)).toEqual({
+      ok: true,
+      date: new Date(Date.UTC(2026, 2, 8, 7)),
+    });
+    // オフセットを付ければ現地時刻にない値でも読める
+    expect(parseDateTime("2026-03-08 02:30-05:00", NEW_YORK).ok).toBe(true);
+  });
+
+  it("夏時間が終わるときに2回ある時刻は読める", () => {
+    expect(parseDateTime("2026-11-01 01:30", NEW_YORK).ok).toBe(true);
+  });
+
   it("夏時間の期間はそのオフセットで解釈する", () => {
     expect(parseDateTime("2026-07-01 12:00", NEW_YORK)).toEqual({
       ok: true,

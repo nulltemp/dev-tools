@@ -1,5 +1,14 @@
-import { describe, expect, it } from "vitest";
-import { digest, formatDigest, hashAll, hmac, toBase64, toHex } from "./hash";
+import { describe, expect, it, vi } from "vitest";
+import {
+  digest,
+  formatDigest,
+  hashAll,
+  hashErrorMessage,
+  hmac,
+  isWebCryptoAvailable,
+  toBase64,
+  toHex,
+} from "./hash";
 
 describe("digest", () => {
   it("空文字列の既知の値になる", async () => {
@@ -35,6 +44,31 @@ describe("hmac", () => {
     expect(toHex(await hmac("SHA-256", "Jefe", "what do ya want for nothing?"))).toBe(
       "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
     );
+  });
+});
+
+describe("空の HMAC 鍵", () => {
+  it("Web Crypto が長さ0の鍵を拒否する(画面では計算せず案内を出す)", async () => {
+    await expect(hmac("SHA-256", "", "abc")).rejects.toThrow();
+  });
+});
+
+describe("hashErrorMessage", () => {
+  it("Web Crypto が使えるときは非対応とは言わない", () => {
+    expect(isWebCryptoAvailable()).toBe(true);
+    const message = hashErrorMessage(new Error("boom"));
+    expect(message).not.toContain("Web Crypto に対応していない");
+    expect(message).toContain("boom");
+  });
+
+  it("Web Crypto が使えないときは非対応の可能性を伝える", () => {
+    vi.stubGlobal("crypto", {});
+    try {
+      expect(isWebCryptoAvailable()).toBe(false);
+      expect(hashErrorMessage(new Error("boom"))).toContain("Web Crypto に対応していない");
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

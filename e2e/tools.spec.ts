@@ -253,4 +253,14 @@ test.describe("ハッシュ生成", () => {
     await input.fill("");
     await expect(resultBlock(page, "HMAC-SHA-256")).toHaveCount(0);
   });
+
+  test("HMAC の秘密鍵が空なら、エラーではなく鍵の入力を案内する", async ({ page }) => {
+    await page.goto("/hash");
+    await page.getByLabel("ハッシュを計算するテキスト").fill("abc");
+    await page.getByLabel("HMAC", { exact: true }).check();
+    await expect(page.getByLabel("HMACの秘密鍵")).toBeFocused();
+    await expect(page.getByText("秘密鍵を入力してください")).toBeVisible();
+    await expect(errorAlert(page)).toHaveCount(0);
+    await expect(resultBlock(page, "HMAC-SHA-256")).toHaveCount(0);
+  });
 });
