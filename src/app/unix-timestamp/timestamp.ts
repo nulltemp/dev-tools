@@ -178,9 +178,10 @@ export const formatRelative = (date: Date, now: number = Date.now()): string => 
 };
 
 const DATE_TIME_PATTERN =
-  /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T ](\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?)?\s*(Z|[+-]\d{2}:?\d{2})?$/i;
+  /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T ](\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?)?\s*(Z|[+-]\d{2}(?::?\d{2})?)?$/i;
 
-// 2026-11-17 12:34:56、2026/11/17、2026-11-17T12:34:56.789+09:00 などを受け付ける。
+// 2026-11-17 12:34:56、2026/11/17、2026-11-17T12:34:56.789+09:00、
+// 2026-11-17 12:00:00.123456+09 などを受け付ける。小数秒のミリ秒未満は切り捨てる。
 // オフセットがなければ timeZone の時刻として解釈する
 export const parseDateTime = (
   input: string,
@@ -201,7 +202,8 @@ export const parseDateTime = (
     hour: Number(h),
     minute: Number(mi),
     second: Number(s),
-    millisecond: Number(frac.padEnd(3, "0")),
+    // Date はミリ秒までしか扱えないので、マイクロ秒・ナノ秒は切り捨てる
+    millisecond: Number(frac.slice(0, 3).padEnd(3, "0")),
   };
 
   const utcMs = wallTimeToUtcMs(wall);
@@ -219,7 +221,8 @@ export const parseDateTime = (
   if (offset) {
     if (offset.toUpperCase() === "Z") return { ok: true, date: new Date(utcMs) };
     const offsetHours = Number(offset.slice(1, 3));
-    const offsetMinutes = Number(offset.slice(-2));
+    // 「+09」のように分のないオフセットは 0分とする
+    const offsetMinutes = Number(offset.slice(3).replace(":", "") || "0");
     // ISO 8601 の範囲(時 00〜23、分 00〜59)を超えるものは受け付けない
     if (offsetHours > 23 || offsetMinutes > 59) {
       return { ok: false, error: "存在しないオフセットです" };
@@ -232,5 +235,19 @@ export const parseDateTime = (
   // オフセットは時刻によって変わる(夏時間)ため、求めた時刻でもう一度確かめる
   const firstGuess = utcMs - timeZoneOffsetMs(new Date(utcMs), timeZone);
   const offsetAtGuess = timeZoneOffsetMs(new Date(firstGuess), timeZone);
-  return { ok: true, date: new Date(utcMs - offsetAtGuess) };
+  const date = new Date(utcMs - offsetAtGuess);
+  // 夏時間が始まるときに飛ばされる時刻(例: New York の 2026-03-08 02:30)は、
+  // 現地時刻に戻すと入力と一致しないので受け付けない
+  const back = toWallTime(date, timeZone);
+  if (
+    back.year !== wall.year ||
+    back.month !== wall.month ||
+    back.day !== wall.day ||
+    back.hour !== wall.hour ||
+    back.minute !== wall.minute ||
+    back.second !== wall.second
+  ) {
+    return { ok: false, error: "夏時間の切り替えで存在しない時刻です" };
+  }
+  return { ok: true, date };
 };
