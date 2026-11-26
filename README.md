@@ -19,7 +19,7 @@ https://dev-tools.nulltemp.com
 
 ## Getting Started
 
-パッケージマネージャーは npm を使用しています。Node.js は 22 が必要です（`.node-version` で 22、`package.json` の `engines` で `>=22.12` を指定しています）。
+パッケージマネージャーは npm を使用しています。Node.js は 24 が必要です（`.node-version` で 24、`package.json` の `engines` で `>=24` を指定しています）。
 
 ```bash
 npm install
