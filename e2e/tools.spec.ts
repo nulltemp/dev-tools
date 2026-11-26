@@ -153,6 +153,41 @@ test.describe("Base64エンコード・デコード", () => {
     await page.getByLabel("デコードするテキスト").fill("abc*");
     await expect(errorAlert(page)).toContainText("「*」");
   });
+
+  test("ファイルを Base64 と data URL にする", async ({ page, externalRequests }) => {
+    await page.goto("/base64");
+    await page.waitForLoadState("networkidle");
+    // ページ読み込み時の計測タグ(本番ビルドの GA)は除き、操作中の通信だけを見る
+    externalRequests.length = 0;
+    await page.getByLabel("Base64にするファイル").setInputFiles({
+      name: "pixel.png",
+      mimeType: "image/png",
+      buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff]),
+    });
+    await expect(page.getByText("pixel.png(9 バイト、image/png)")).toBeVisible();
+    await expect(resultBlock(page, "ファイルのBase64").locator("pre")).toHaveText("iVBORw0KGgr/");
+    await expect(resultBlock(page, "data URL").locator("pre")).toHaveText(
+      "data:image/png;base64,iVBORw0KGgr/"
+    );
+    await page.getByLabel("URLセーフ(Base64URL)").check();
+    await expect(resultBlock(page, "ファイルのBase64").locator("pre")).toHaveText("iVBORw0KGgr_");
+    await page.waitForLoadState("networkidle");
+    expect(externalRequests.filter((url) => url.includes("iVBORw0KGgr"))).toEqual([]);
+  });
+
+  test("バイナリのデコード結果を16進ダンプで表示し、ファイルとして保存できる", async ({ page }) => {
+    await page.goto("/base64");
+    await page.getByRole("button", { name: "デコード", exact: true }).click();
+    await page.getByLabel("デコードするテキスト").fill("data:application/octet-stream;base64,AP/+");
+    await expect(errorAlert(page)).toHaveCount(0);
+    await expect(page.getByText("3 バイト(application/octet-stream)")).toBeVisible();
+    await expect(resultBlock(page, "16進ダンプ").locator("pre")).toHaveText("00000000  00 ff fe");
+
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("button", { name: /ファイルとして保存/ }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe("decoded.bin");
+  });
 });
 
 test.describe("URLエンコード・デコード", () => {

@@ -12,7 +12,11 @@ import SwapVertIcon from "@mui/icons-material/SwapVert";
 import CodeBlock from "./CodeBlock";
 import { monoInput } from "./inputStyles";
 
-export type ConvertResult = { ok: true; text: string } | { ok: false; error: string };
+// 変換できないときの error は Alert で出す。severity: "info" と details で、
+// エラーではない別の表示(Base64 のバイナリのデコード結果など)にもできる
+export type ConvertResult =
+  | { ok: true; text: string }
+  | { ok: false; error: string; severity?: "error" | "info"; details?: React.ReactNode };
 
 type Mode = "encode" | "decode";
 
@@ -25,12 +29,15 @@ export default function EncodeDecodeTool({
   decode,
   option,
   placeholders,
+  children,
 }: {
   encode: (text: string, optionChecked: boolean) => ConvertResult;
   decode: (text: string, optionChecked: boolean) => ConvertResult;
   // 変換の細かい違いを切り替えるチェックボックス(例: URLセーフ)
   option: { label: string; appliesTo: Mode[] };
   placeholders: Record<Mode, string>;
+  // モードごとに結果の下に添える部品(Base64 のファイル選択など)
+  children?: (mode: Mode, optionChecked: boolean) => React.ReactNode;
 }) {
   const [mode, setMode] = useState<Mode>("encode");
   const [input, setInput] = useState("");
@@ -91,7 +98,12 @@ export default function EncodeDecodeTool({
         slotProps={{ htmlInput: { "aria-label": `${MODE_LABELS[mode]}するテキスト` } }}
         sx={monoInput}
       />
-      {result && !result.ok && <Alert severity="error">{result.error}</Alert>}
+      {result && !result.ok && (
+        <>
+          <Alert severity={result.severity ?? "error"}>{result.error}</Alert>
+          {result.details}
+        </>
+      )}
       {result?.ok && (
         <>
           <CodeBlock
@@ -109,6 +121,7 @@ export default function EncodeDecodeTool({
           </Button>
         </>
       )}
+      {children?.(mode, optionChecked)}
     </Stack>
   );
 }
