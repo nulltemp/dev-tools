@@ -289,6 +289,29 @@ test.describe("テキスト差分", () => {
     );
   });
 
+  test("変更から離れた変更のない行を畳み、展開・すべて表示できる", async ({ page }) => {
+    await page.goto("/diff");
+    const before = Array.from({ length: 20 }, (_, i) => `line ${i + 1}`);
+    const after = before.map((line, i) => (i === 9 ? "changed" : line));
+    await page.getByLabel("変更前のテキスト").fill(before.join("\n"));
+    await page.getByLabel("変更後のテキスト").fill(after.join("\n"));
+
+    const result = resultBlock(page, "差分");
+    const rows = result.locator("tbody tr");
+    // 10行目の変更(2行)と前後3行ずつ、その前後の6行・7行は畳む
+    await expect(rows).toHaveCount(10);
+    await expect(rows.first()).toHaveText("… 6 行の変更なし(表示する)");
+    await expect(rows.last()).toHaveText("… 7 行の変更なし(表示する)");
+
+    await result.getByRole("button", { name: "… 6 行の変更なし(表示する)" }).click();
+    await expect(rows).toHaveCount(15);
+    await expect(rows.first()).toHaveText("11line 1");
+
+    await result.getByLabel("変更のない行もすべて表示").check();
+    await expect(rows).toHaveCount(21);
+    await expect(result.locator('tbody tr[data-type="skip"]')).toHaveCount(0);
+  });
+
   test("空白・大文字小文字の違いを無視でき、差分がなければそう表示する", async ({ page }) => {
     await page.goto("/diff");
     await page.getByLabel("変更前のテキスト").fill("Hello  World");
