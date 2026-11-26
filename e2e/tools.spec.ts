@@ -328,3 +328,61 @@ test.describe("テキスト差分", () => {
     await expect(page.getByText("差分はありません。")).toHaveCount(0);
   });
 });
+
+test.describe("正規表現テスター", () => {
+  test("一致した箇所とキャプチャグループを表示し、置換結果をコピーできる", async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await page.goto("/regex");
+    await page.getByLabel("正規表現のパターン").fill("(?<year>\\d{4})-(\\d{2})");
+    await page.getByLabel("テスト文字列").fill("from 2026-11 to 2027-01");
+
+    const highlighted = page.getByRole("region", { name: "一致した箇所" });
+    await expect(highlighted.getByRole("status")).toHaveText("2 件一致");
+    await expect(highlighted.locator("mark")).toHaveText(["2026-11", "2027-01"]);
+    const list = page.getByRole("region", { name: "一致の一覧" });
+    await expect(list.getByRole("listitem").first()).toContainText("位置 5〜12");
+    await expect(list.getByRole("listitem").first()).toContainText('グループ <year>"2026"');
+
+    // g を外すと最初の1件だけになる
+    await page.getByRole("button", { name: "全体(g)" }).click();
+    await expect(highlighted.getByRole("status")).toHaveText("1 件一致");
+    await page.getByRole("button", { name: "全体(g)" }).click();
+
+    await page.getByLabel("置換する").check();
+    await page.getByLabel("置換文字列").fill("$2/$<year>");
+    const replaced = resultBlock(page, "置換結果");
+    await expect(replaced.locator("pre")).toHaveText("from 11/2026 to 01/2027");
+    await replaced.getByRole("button", { name: "置換結果をコピー" }).click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      "from 11/2026 to 01/2027"
+    );
+  });
+
+  test("構文エラーを表示し、パターンを直すと消える", async ({ page }) => {
+    await page.goto("/regex");
+    await page.getByLabel("テスト文字列").fill("abc");
+    const pattern = page.getByLabel("正規表現のパターン");
+    await pattern.fill("(a");
+    await expect(errorAlert(page)).toContainText("正規表現が正しくありません");
+    await pattern.fill("(a)");
+    await expect(errorAlert(page)).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "一致した箇所" }).locator("mark")).toHaveText(
+      "a"
+    );
+  });
+
+  test("終わらない照合は中断し、次の入力では照合できる", async ({ page }) => {
+    await page.goto("/regex");
+    await page.getByLabel("テスト文字列").fill(`${"a".repeat(40)}!`);
+    const pattern = page.getByLabel("正規表現のパターン");
+    await pattern.fill("(a+)+$");
+    await expect(errorAlert(page)).toContainText("中断しました", { timeout: 10_000 });
+    await pattern.fill("a+");
+    await expect(page.getByRole("region", { name: "一致した箇所" }).getByRole("status")).toHaveText(
+      "1 件一致"
+    );
+  });
+});
