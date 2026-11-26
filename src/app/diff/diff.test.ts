@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  diffBlocks,
   diffChars,
   diffLines,
   DiffTooLargeError,
   formatUnified,
+  groupHunks,
   MAX_LINE_EDITS,
   MAX_LINES,
   splitLines,
@@ -178,5 +180,55 @@ describe("formatUnified", () => {
     expect(formatUnified(diffLines("a\nb", "").lines)).toBe(
       "--- before\n+++ after\n@@ -1,2 +0,0 @@\n-a\n-b\n"
     );
+  });
+});
+
+describe("groupHunks・diffBlocks", () => {
+  const numbered = (n: number, changed: number[] = []) =>
+    Array.from({ length: n }, (_, i) => (changed.includes(i + 1) ? `x${i + 1}` : `${i + 1}`)).join(
+      "\n"
+    );
+  const base = numbered(20);
+
+  it("差分がなければハンクはなく、全体が1つの skip", () => {
+    const lines = diffLines(base, base).lines;
+    expect(groupHunks(lines)).toEqual([]);
+    expect(diffBlocks(lines)).toEqual([{ type: "skip", start: 0, end: 19 }]);
+  });
+
+  it("離れた変更は別のハンクにし、その間と前後を skip にする", () => {
+    // 5行目と15行目を変更(それぞれ削除+追加の2行)
+    const lines = diffLines(base, numbered(20, [5, 15])).lines;
+    expect(groupHunks(lines)).toEqual([
+      [1, 8],
+      [12, 19],
+    ]);
+    expect(diffBlocks(lines)).toEqual([
+      // 先頭の変更なしは1行だけなので、畳まずにハンクとつなげる
+      { type: "lines", start: 0, end: 8 },
+      { type: "skip", start: 9, end: 11 },
+      { type: "lines", start: 12, end: 19 },
+      { type: "skip", start: 20, end: 21 },
+    ]);
+  });
+
+  it("近い変更は1つのハンクにまとめる", () => {
+    const lines = diffLines(base, numbered(20, [5, 11])).lines;
+    expect(groupHunks(lines)).toEqual([[1, 15]]);
+  });
+
+  it("先頭・末尾の変更はその端までをハンクにし、1行だけの skip は表示する行に含める", () => {
+    const lines = diffLines(numbered(9), numbered(9, [1, 9])).lines;
+    // 1行目(削除・追加)、2〜8行目、9行目(削除・追加) の11行。間の変更なしは7行
+    expect(groupHunks(lines)).toEqual([
+      [0, 4],
+      [6, 10],
+    ]);
+    expect(diffBlocks(lines)).toEqual([{ type: "lines", start: 0, end: 10 }]);
+  });
+
+  it("context を変えられる", () => {
+    const lines = diffLines(base, numbered(20, [10])).lines;
+    expect(groupHunks(lines, 0)).toEqual([[9, 10]]);
   });
 });

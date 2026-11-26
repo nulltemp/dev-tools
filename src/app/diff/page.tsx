@@ -2,6 +2,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Paper from "@mui/material/Paper";
@@ -14,11 +15,20 @@ import ToolPage from "../ToolPage";
 import { monoInput } from "../inputStyles";
 import { findTool } from "../tools";
 import { toolGuides } from "../toolGuides";
-import { diffLines, DiffTooLargeError, formatUnified, type DiffLine, type DiffResult } from "./diff";
+import {
+  diffBlocks,
+  diffLines,
+  DiffTooLargeError,
+  formatUnified,
+  type DiffLine,
+  type DiffResult,
+} from "./diff";
 
 const { name, description } = findTool("/diff");
 
 const SIGNS = { equal: "", delete: "-", insert: "+" } as const;
+// 変更の前後に表示する変更のない行の数(unified diff のコピーと同じ)
+const CONTEXT = 3;
 
 // 追加は success、削除は error の色を薄く敷く(記号 +/- も出すので色だけに頼らない)
 const lineColor = (type: DiffLine["type"]) => (type === "insert" ? "success" : "error");
@@ -119,9 +129,21 @@ export default function DiffPage() {
 
 function DiffView({ result }: { result: DiffResult }) {
   const unified = useMemo(
-    () => formatUnified(result.lines, 3, { before: "変更前", after: "変更後" }),
+    () => formatUnified(result.lines, CONTEXT, { before: "変更前", after: "変更後" }),
     [result]
   );
+  const blocks = useMemo(() => diffBlocks(result.lines, CONTEXT), [result]);
+  const [showAll, setShowAll] = useState(false);
+  // 展開した skip の先頭の添字。差分が変わったら(result が別物になったら)すべて畳み直す
+  const [expanded, setExpanded] = useState<{ result: DiffResult; starts: Set<number> }>({
+    result,
+    starts: new Set(),
+  });
+  const expandedStarts = expanded.result === result ? expanded.starts : new Set<number>();
+  const expand = (start: number) =>
+    setExpanded({ result, starts: new Set(expandedStarts).add(start) });
+  const rows = (start: number, end: number) =>
+    result.lines.slice(start, end + 1).map((line, i) => <Row key={start + i} line={line} />);
   return (
     <Paper component="section" variant="outlined" sx={{ overflow: "hidden" }}>
       <Box
@@ -142,7 +164,17 @@ function DiffView({ result }: { result: DiffResult }) {
         <Typography variant="body2" role="status" sx={{ color: "text.secondary" }}>
           {`追加 ${result.added} 行・削除 ${result.removed} 行`}
         </Typography>
-        <Box sx={{ ml: "auto" }}>
+        <Box sx={{ ml: "auto", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={showAll}
+                onChange={(e) => setShowAll(e.target.checked)}
+              />
+            }
+            label="変更のない行もすべて表示"
+          />
           <CopyButton text={unified} label="unified diff 形式でコピー" />
         </Box>
       </Box>
@@ -166,9 +198,19 @@ function DiffView({ result }: { result: DiffResult }) {
             </tr>
           </Box>
           <tbody>
-            {result.lines.map((line, index) => (
-              <Row key={index} line={line} />
-            ))}
+            {showAll
+              ? rows(0, result.lines.length - 1)
+              : blocks.map((block) =>
+                  block.type === "lines" || expandedStarts.has(block.start) ? (
+                    rows(block.start, block.end)
+                  ) : (
+                    <SkipRow
+                      key={`skip-${block.start}`}
+                      count={block.end - block.start + 1}
+                      onExpand={() => expand(block.start)}
+                    />
+                  )
+                )}
           </tbody>
         </Box>
       </Box>
@@ -194,6 +236,18 @@ const numberCell = {
   whiteSpace: "nowrap",
   width: "1%",
 } as const;
+
+function SkipRow({ count, onExpand }: { count: number; onExpand: () => void }) {
+  return (
+    <Box component="tr" data-type="skip" sx={{ bgcolor: "action.hover" }}>
+      <Box component="td" colSpan={4} sx={{ px: 1 }}>
+        <Button size="small" onClick={onExpand} sx={{ fontFamily: "var(--font-sans)" }}>
+          {`… ${count.toLocaleString()} 行の変更なし(表示する)`}
+        </Button>
+      </Box>
+    </Box>
+  );
+}
 
 function Row({ line }: { line: DiffLine }) {
   const changed = line.type !== "equal";

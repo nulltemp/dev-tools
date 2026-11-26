@@ -18,7 +18,7 @@ https://dev-tools.nulltemp.com
 
 ## Getting Started
 
-パッケージマネージャーは npm を使用しています。
+パッケージマネージャーは npm を使用しています。Node.js は 22 が必要です（`.node-version` で 22、`package.json` の `engines` で `>=22.12` を指定しています）。
 
 ```bash
 npm install
@@ -44,6 +44,15 @@ npm run test:e2e
 1. `src/app/<tool-name>/page.tsx` に新しいルートを作成する
 2. `src/app/tools.ts` の `tools` 配列にツール（`href`・`name`・`description`）を追加する（サイドバー・ホームのカード・サイトマップはここから自動生成されます）
 3. `src/app/<tool-name>/layout.tsx` を作成し、`export const metadata = toolMetadata("/<tool-name>");` でタイトル・canonical・OGPを設定し、`<JsonLd data={toolJsonLd("/<tool-name>")} />` で構造化データを出力する（既存ツールの `layout.tsx` を参照）
+4. `src/app/toolGuides.ts` にツールの使い方（`usage`）と用語の解説（`terms`）を追加し、`ToolPage` に `guide={toolGuides["/<tool-name>"]}` を渡す（ツールの下に解説として表示されます。`src/app/tools.test.ts` と `e2e/site.spec.ts` が全ツールに解説があることを確かめるので、ないとテストが失敗します）
+
+あわせて、次のことも守ってください。
+
+- ページは `ToolPage` で包み、`findTool("/<tool-name>")` の `name`・`description` を渡す（見出しをナビゲーションと揃えるため）。入力欄には `aria-label` を付ける
+- ロジックは `page.tsx` に書かず、隣のモジュール（例: `jwt-decoder/decodeJwt.ts`）に切り出して `*.test.ts` で単体テストする
+- 主な操作の E2E テストを `e2e/tools.spec.ts` に追加する（ナビゲーション・見出し・横はみ出しは `e2e/site.spec.ts` が全ツール分を確かめます）
+
+詳しい手順と決まりごとは [CLAUDE.md](./CLAUDE.md) の「Adding a new tool」を参照してください。
 
 各ツールページは `"use client"` の自己完結したコンポーネントで、独自の `useState` ベースのロジックのみを持ちます（ツール間の共有状態・APIレイヤー・データフェッチはありません）。
 

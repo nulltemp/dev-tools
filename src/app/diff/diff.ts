@@ -259,24 +259,52 @@ const SIGNS = { equal: " ", delete: "-", insert: "+" } as const;
 
 const range = (start: number, count: number) => (count === 1 ? `${start}` : `${start},${count}`);
 
+// 変更の前後 context 行をまとめたハンクの範囲([先頭, 末尾] の添字、末尾を含む)。近いものは1つにする
+export const groupHunks = (lines: DiffLine[], context = 3): [number, number][] => {
+  const hunks: [number, number][] = [];
+  lines.forEach((line, index) => {
+    if (line.type === "equal") return;
+    const from = Math.max(0, index - context);
+    const to = Math.min(lines.length - 1, index + context);
+    const last = hunks[hunks.length - 1];
+    if (last && from <= last[1] + 1) last[1] = to;
+    else hunks.push([from, to]);
+  });
+  return hunks;
+};
+
+// 画面に出す行のまとまり。skip はハンクの外の変更のない行(畳んで表示する)。start・end は添字で end を含む
+export type DiffBlock = { type: "lines" | "skip"; start: number; end: number };
+
+// lines 全体を、ハンク(lines)とその間の変更のない行(skip)に順に分ける。
+// 1行だけの skip は畳んでも短くならないので、表示する行に含める
+export const diffBlocks = (lines: DiffLine[], context = 3): DiffBlock[] => {
+  const blocks: DiffBlock[] = [];
+  const push = (type: DiffBlock["type"], start: number, end: number) => {
+    if (end < start) return;
+    const kind = type === "skip" && end === start ? "lines" : type;
+    const last = blocks[blocks.length - 1];
+    if (last && last.type === "lines" && kind === "lines") last.end = end;
+    else blocks.push({ type: kind, start, end });
+  };
+  let next = 0;
+  for (const [from, to] of groupHunks(lines, context)) {
+    push("skip", next, from - 1);
+    push("lines", from, to);
+    next = to + 1;
+  }
+  push("skip", next, lines.length - 1);
+  return blocks;
+};
+
 // unified diff 形式(diff -u と同じ、前後 context 行を含むハンク)にする。差分がなければ空文字列
 export const formatUnified = (
   lines: DiffLine[],
   context = 3,
   labels: { before: string; after: string } = { before: "before", after: "after" }
 ): string => {
-  const changed = lines.flatMap((line, index) => (line.type === "equal" ? [] : [index]));
-  if (changed.length === 0) return "";
-
-  // 変更の前後 context 行をまとめ、近いものは1つのハンクにする
-  const hunks: [number, number][] = [];
-  for (const index of changed) {
-    const from = Math.max(0, index - context);
-    const to = Math.min(lines.length - 1, index + context);
-    const last = hunks[hunks.length - 1];
-    if (last && from <= last[1] + 1) last[1] = to;
-    else hunks.push([from, to]);
-  }
+  const hunks = groupHunks(lines, context);
+  if (hunks.length === 0) return "";
 
   // 各行より前にある変更前・変更後の行数(ハンクの開始位置の計算に使う)
   const oldBefore: number[] = [];
