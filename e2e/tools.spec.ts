@@ -255,6 +255,57 @@ test.describe("UUID生成", () => {
   });
 });
 
+test.describe("パスワード生成", () => {
+  const generated = async (page: import("@playwright/test").Page) =>
+    (await resultBlock(page, /生成結果/).locator("pre").textContent())!.split("\n");
+
+  test("指定した長さ・個数で、選んだ種類の文字を必ず含めて生成する", async ({ page }) => {
+    await page.goto("/password");
+    await page.getByLabel("長さ").fill("12");
+    await page.getByLabel("個数").fill("3");
+    await page.getByRole("button", { name: "生成", exact: true }).click();
+
+    const passwords = await generated(page);
+    expect(passwords).toHaveLength(3);
+    for (const password of passwords) {
+      expect(password).toHaveLength(12);
+      expect(password).toMatch(/[A-Z]/);
+      expect(password).toMatch(/[a-z]/);
+      expect(password).toMatch(/[0-9]/);
+      expect(password).toMatch(/[^A-Za-z0-9]/);
+    }
+    expect(new Set(passwords).size).toBe(3);
+  });
+
+  test("数字だけ・紛らわしい文字を除いて生成し、エントロピーを表示する", async ({ page }) => {
+    await page.goto("/password");
+    await page.getByLabel("英大文字(A-Z)").uncheck();
+    await page.getByLabel("英小文字(a-z)").uncheck();
+    await page.getByLabel("記号(!#$%など)").uncheck();
+    await page.getByLabel("紛らわしい文字(0 O o 1 l I |)を除く").check();
+    await page.getByLabel("長さ").fill("20");
+    // 8種類の数字で20文字: 20 × log2(8) = 60ビット
+    await expect(page.getByText("エントロピー: 約60ビット")).toBeVisible();
+    await page.getByRole("button", { name: "生成", exact: true }).click();
+
+    for (const password of await generated(page)) expect(password).toMatch(/^[2-9]{20}$/);
+  });
+
+  test("種類をすべて外すと生成できず、条件を変えると前の結果は消える", async ({ page }) => {
+    await page.goto("/password");
+    await page.getByRole("button", { name: "生成", exact: true }).click();
+    await expect(resultBlock(page, /生成結果/)).toBeVisible();
+    await page.getByLabel("数字(0-9)").uncheck();
+    await expect(resultBlock(page, /生成結果/)).toHaveCount(0);
+
+    await page.getByLabel("英大文字(A-Z)").uncheck();
+    await page.getByLabel("英小文字(a-z)").uncheck();
+    await page.getByLabel("記号(!#$%など)").uncheck();
+    await expect(errorAlert(page)).toHaveText("文字の種類を1つ以上選んでください");
+    await expect(page.getByRole("button", { name: "生成", exact: true })).toBeDisabled();
+  });
+});
+
 test.describe("ハッシュ生成", () => {
   test("SHA-256 などを計算し、出力形式を切り替えられる", async ({ page }) => {
     await page.goto("/hash");
