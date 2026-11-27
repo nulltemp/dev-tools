@@ -6,7 +6,7 @@ export const PRIVACY_POLICY_URL = "https://nulltemp.com/privacy/";
 export const KOFI_URL = "https://ko-fi.com/nulltemp";
 export const GITHUB_URL = "https://github.com/nulltemp/dev-tools";
 export const SITE_DESCRIPTION =
-  "JSON整形、JWTデコーダー、Base64・URLエンコード、UUID生成、ハッシュ生成(SHA-256)、Unixタイムスタンプ変換、テキスト差分、正規表現テスターなど、開発に便利なツール集";
+  "JSON整形、JWTデコーダー、Base64(画像・data URL)・URLエンコード、UUID生成、ハッシュ生成(SHA-256)、Unixタイムスタンプ変換、テキスト差分、正規表現テスターなど、開発に便利なツール集";
 
 // 静的ホスティングで Content-Type が正しく付くよう拡張子付きの静的画像を使う
 export const OG_IMAGE = {
@@ -47,7 +47,8 @@ export const tools: Tool[] = [
   {
     href: "/base64",
     name: "Base64エンコード・デコード",
-    description: "テキストをBase64にエンコード、Base64をテキストにデコードします",
+    description:
+      "テキストや画像などのファイルをBase64・data URLにエンコード、Base64をテキストやファイルにデコードします",
   },
   {
     href: "/url-encode",

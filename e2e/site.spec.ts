@@ -1,4 +1,5 @@
-import { GITHUB_URL, tools } from "../src/app/tools";
+import type { Page } from "@playwright/test";
+import { GITHUB_URL, SITE_URL, tools } from "../src/app/tools";
 import { expect, isMobile, openNav, test } from "./fixtures";
 
 const pages = [{ href: "/", name: "デベロッパーツール" }, ...tools];
@@ -122,6 +123,32 @@ test.describe("配色", () => {
   }
 });
 
+// 本番のホスト名(SITE_URL)への通信を手元のサーバーに中継し、本番で開いたときの動き(GA の読み込み)を確かめる。
+// fixtures のルートより後に登録したルートが優先される
+const openAsProduction = async (page: Page, baseURL: string, href: string) => {
+  await page.route(`${SITE_URL}/**`, async (route) => {
+    const url = new URL(route.request().url());
+    try {
+      const response = await route.fetch({ url: new URL(url.pathname + url.search, baseURL).href });
+      await route.fulfill({ response });
+    } catch {
+      // テストが終わってページを閉じた後に、先読み(prefetch)などの中継が終わることがある
+    }
+  });
+  await page.goto(`${SITE_URL}${href}`);
+};
+
+test.describe("サイトマップ", () => {
+  test("sitemap.xml にホームと全ツールの URL がある", async ({ request }) => {
+    const response = await request.get("/sitemap.xml");
+    expect(response.ok()).toBe(true);
+    const xml = await response.text();
+    for (const href of ["", ...tools.map((tool) => tool.href)]) {
+      expect(xml).toContain(`<loc>${SITE_URL}${href}</loc>`);
+    }
+  });
+});
+
 test.describe("入力が送信されない", () => {
   test("ツールを使っても外部への通信が起きない", async ({ page, externalRequests }) => {
     await page.goto("/jwt-decoder");
@@ -144,7 +171,7 @@ test.describe("入力が送信されない", () => {
     );
   });
 
-  test("Google Analytics の読み込みと送信は CSP で止まらない", async ({ page }) => {
+  test("Google Analytics の読み込みと送信は CSP で止まらない", async ({ page, baseURL }) => {
     // 本物の gtag.js の代わりに、GA4 と同じ送信先へ通信するスクリプトを返す。
     // 送信自体は fixtures が中断するので計測は届かず、CSP 違反だけが fixtures のチェックで検出される
     const collect = [
@@ -161,9 +188,29 @@ test.describe("入力が送信されない", () => {
         ]));`,
       })
     );
-    await page.goto("/jwt-decoder");
+    await openAsProduction(page, baseURL!, "/jwt-decoder");
     await page.waitForFunction(() => "__gaStub" in window);
     await page.evaluate(() => (window as unknown as { __gaStub: Promise<unknown> }).__gaStub);
+  });
+
+  test("本番以外のホスト名(localhost)では Google Analytics を読み込まない", async ({
+    page,
+    externalRequests,
+  }) => {
+    await page.goto("/jwt-decoder");
+    await page.waitForLoadState("networkidle");
+    expect(externalRequests.filter((url) => url.includes("googletagmanager.com"))).toEqual([]);
+  });
+
+  test("本番のホスト名では Google Analytics を読み込む", async ({ page, baseURL }) => {
+    const gtag = new Promise<string>((resolve) =>
+      page.route("https://www.googletagmanager.com/gtag/js*", (route) => {
+        resolve(route.request().url());
+        return route.fulfill({ contentType: "text/javascript", body: "" });
+      })
+    );
+    await openAsProduction(page, baseURL!, "/jwt-decoder");
+    expect(await gtag).toContain("id=G-");
   });
 
   test("CSP で自サイトと Google Analytics 以外への通信が禁止されている", async ({
