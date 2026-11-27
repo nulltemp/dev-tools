@@ -298,6 +298,38 @@ test.describe("ハッシュ生成", () => {
     await expect(errorAlert(page)).toHaveCount(0);
     await expect(resultBlock(page, "HMAC-SHA-256")).toHaveCount(0);
   });
+
+  test("ファイルのハッシュを計算し、貼り付けた値と照合する", async ({ page, externalRequests }) => {
+    await page.goto("/hash");
+    await page.waitForLoadState("networkidle");
+    // ページ読み込み時の計測タグ(本番ビルドの GA)は除き、操作中の通信だけを見る
+    externalRequests.length = 0;
+    await page.getByRole("button", { name: "ファイル", exact: true }).click();
+    await page.getByLabel("ハッシュを計算するファイル").setInputFiles({
+      name: "abc.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("abc"),
+    });
+    await expect(page.getByText("abc.txt(3 バイト)")).toBeVisible();
+    await expect(resultBlock(page, "SHA-256").locator("pre")).toHaveText(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
+    await expect(resultBlock(page, "SHA-1").locator("pre")).toHaveText(
+      "a9993e364706816aba3e25717850c26c9cd0d89d"
+    );
+
+    const expected = page.getByLabel("照合する値");
+    await expected.fill("BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD");
+    await expect(page.getByText("SHA-256 の値と一致しました。")).toBeVisible();
+    await expected.fill("deadbeef");
+    await expect(page.getByText("どのアルゴリズムの値とも一致しません。")).toBeVisible();
+
+    // テキストに戻すとファイルの結果は出さない
+    await page.getByRole("button", { name: "テキスト", exact: true }).click();
+    await expect(resultBlock(page, "SHA-256")).toHaveCount(0);
+    await page.waitForLoadState("networkidle");
+    expect(externalRequests).toEqual([]);
+  });
 });
 
 test.describe("テキスト差分", () => {

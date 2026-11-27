@@ -63,7 +63,7 @@ export const tools: Tool[] = [
   {
     href: "/hash",
     name: "ハッシュ生成",
-    description: "テキストのSHA-1・SHA-256・SHA-384・SHA-512ハッシュ(HMACも)を計算します",
+    description: "テキストやファイルのSHA-1・SHA-256・SHA-384・SHA-512ハッシュ(HMACも)を計算します",
   },
   {
     href: "/diff",
