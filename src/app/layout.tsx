@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { Roboto } from "next/font/google";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
+import Analytics from "./Analytics";
 import AppShell from "./AppShell";
 import { CONTENT_SECURITY_POLICY } from "./csp";
 import theme from "./theme";
@@ -67,10 +67,8 @@ export default function RootLayout({
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
-      {/* 本番ビルドでのみ .env.production から設定される */}
-      {process.env.NEXT_PUBLIC_GA_ID && (
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
-      )}
+      {/* 本番ビルドでのみ .env.production から設定される。読み込むのは本番のホスト名で開いたときだけ */}
+      {process.env.NEXT_PUBLIC_GA_ID && <Analytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
     </html>
   );
 }
