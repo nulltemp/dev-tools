@@ -241,7 +241,7 @@ test.describe("入力が送信されない", () => {
 
 test.describe("レスポンスヘッダー", () => {
   // npm run start(vite preview)は _headers を読まないので、出力された out/_headers の規則を確かめる
-  test("_headers で nosniff・Referrer-Policy を全パスに、immutable をハッシュ付きの /_next/static/* だけに付ける", async ({
+  test("_headers で nosniff・Referrer-Policy・フレーム埋め込みの禁止を全パスに、immutable をハッシュ付きの /_next/static/* だけに付ける", async ({
     request,
   }) => {
     const response = await request.get("/_headers");
@@ -257,6 +257,8 @@ test.describe("レスポンスヘッダー", () => {
       expect.arrayContaining([
         "X-Content-Type-Options: nosniff",
         "Referrer-Policy: strict-origin-when-cross-origin",
+        "X-Frame-Options: DENY",
+        "Content-Security-Policy: frame-ancestors 'none'",
       ])
     );
     expect(rules.get("/_next/static/*")).toContain(
