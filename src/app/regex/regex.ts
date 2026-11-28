@@ -54,10 +54,33 @@ export const normalizeFlags = (flags: Iterable<string>): string => {
     .join("");
 };
 
+// u と v は同時に指定できない(new RegExp は SyntaxError になる)ので、片方を選んだらもう片方を外す
+const EXCLUSIVE_FLAGS: Partial<Record<string, string>> = { u: "v", v: "u" };
+
+// ToggleButtonGroup の新しい選択(next)から、今回オンにしたフラグと排他のフラグを外す
+export const toggleFlags = (prev: readonly string[], next: readonly string[]): string[] => {
+  const added = next.filter((f) => !prev.includes(f));
+  const removed = new Set(added.map((f) => EXCLUSIVE_FLAGS[f]).filter((f) => f !== undefined));
+  return next.filter((f) => !removed.has(f));
+};
+
+// フラグ自体の誤り(パターンの誤りとは別に伝える)。正しければ undefined
+export const flagsError = (flags: string): string | undefined => {
+  const known = new Set<string>(REGEX_FLAGS.map((f) => f.flag));
+  const unknown = [...flags].filter((f) => !known.has(f));
+  if (unknown.length > 0) return `使えないフラグがあります(${[...new Set(unknown)].join("")})。`;
+  const duplicated = [...flags].filter((f, i) => flags.indexOf(f) !== i);
+  if (duplicated.length > 0) return `フラグが重複しています(${[...new Set(duplicated)].join("")})。`;
+  if (flags.includes("u") && flags.includes("v")) return "u と v のフラグは同時に使えません。";
+  return undefined;
+};
+
 export const compileRegex = (
   pattern: string,
   flags: string
 ): { regex: RegExp; error?: undefined } | { regex?: undefined; error: string } => {
+  const invalidFlags = flagsError(flags);
+  if (invalidFlags !== undefined) return { error: invalidFlags };
   try {
     return { regex: new RegExp(pattern, flags) };
   } catch (error) {

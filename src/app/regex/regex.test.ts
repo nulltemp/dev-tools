@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   compileRegex,
   findMatches,
+  flagsError,
   normalizeFlags,
   replaceText,
   runRegex,
   splitByMatches,
+  toggleFlags,
 } from "./regex";
 
 describe("normalizeFlags", () => {
@@ -21,8 +23,37 @@ describe("compileRegex", () => {
     expect(result.error).toMatch(/^正規表現が正しくありません\(.+\)。$/);
   });
 
-  it("u と v を同時に指定するとエラーにする", () => {
-    expect(compileRegex("a", "uv").error).toBeDefined();
+  it("u と v を同時に指定すると、構文エラーではなくフラグの日本語のエラーにする", () => {
+    expect(compileRegex("a", "guv").error).toBe("u と v のフラグは同時に使えません。");
+  });
+});
+
+describe("flagsError", () => {
+  it("正しいフラグなら undefined", () => {
+    expect(flagsError("")).toBeUndefined();
+    expect(flagsError("gimsuy")).toBeUndefined();
+    expect(flagsError("gv")).toBeUndefined();
+  });
+
+  it("u と v の同時指定・未知のフラグ・重複をエラーにする", () => {
+    expect(flagsError("uv")).toBe("u と v のフラグは同時に使えません。");
+    expect(flagsError("gx")).toBe("使えないフラグがあります(x)。");
+    expect(flagsError("gg")).toBe("フラグが重複しています(g)。");
+  });
+});
+
+describe("toggleFlags", () => {
+  it("u をオンにした状態で v を選ぶと u が外れる", () => {
+    expect(toggleFlags(["g", "u"], ["g", "u", "v"])).toEqual(["g", "v"]);
+  });
+
+  it("v をオンにした状態で u を選ぶと v が外れる", () => {
+    expect(toggleFlags(["v"], ["v", "u"])).toEqual(["u"]);
+  });
+
+  it("ほかのフラグの切り替えはそのまま", () => {
+    expect(toggleFlags(["g", "u"], ["g", "u", "i"])).toEqual(["g", "u", "i"]);
+    expect(toggleFlags(["g", "u"], ["g"])).toEqual(["g"]);
   });
 });
 
