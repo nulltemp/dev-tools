@@ -492,6 +492,25 @@ test.describe("正規表現テスター", () => {
     );
   });
 
+  test("u と v のフラグは片方を選ぶともう片方が外れる", async ({ page }) => {
+    await page.goto("/regex");
+    await page.getByLabel("正規表現のパターン").fill("a");
+    await page.getByLabel("テスト文字列").fill("a");
+    const u = page.getByRole("button", { name: "Unicode(u)" });
+    const v = page.getByRole("button", { name: "Unicode 集合(v)" });
+    await u.click();
+    await expect(u).toHaveAttribute("aria-pressed", "true");
+    await v.click();
+    await expect(v).toHaveAttribute("aria-pressed", "true");
+    await expect(u).toHaveAttribute("aria-pressed", "false");
+    await expect(errorAlert(page)).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "一致した箇所" }).getByRole("status")).toHaveText(
+      "1 件一致"
+    );
+    await u.click();
+    await expect(v).toHaveAttribute("aria-pressed", "false");
+  });
+
   test("終わらない照合は中断し、次の入力では照合できる", async ({ page }) => {
     await page.goto("/regex");
     await page.getByLabel("テスト文字列").fill(`${"a".repeat(40)}!`);

@@ -238,3 +238,33 @@ test.describe("入力が送信されない", () => {
     pageErrors.length = 0;
   });
 });
+
+test.describe("レスポンスヘッダー", () => {
+  // npm run start(vite preview)は _headers を読まないので、出力された out/_headers の規則を確かめる
+  test("_headers で nosniff・Referrer-Policy を全パスに、immutable をハッシュ付きの /_next/static/* だけに付ける", async ({
+    request,
+  }) => {
+    const response = await request.get("/_headers");
+    expect(response.ok()).toBe(true);
+    const rules = new Map<string, string[]>();
+    let current: string[] | undefined;
+    for (const line of (await response.text()).split("\n")) {
+      if (!line.trim() || line.trim().startsWith("#")) continue;
+      if (/^\s/.test(line)) current?.push(line.trim());
+      else rules.set(line.trim(), (current = []));
+    }
+    expect(rules.get("/*")).toEqual(
+      expect.arrayContaining([
+        "X-Content-Type-Options: nosniff",
+        "Referrer-Policy: strict-origin-when-cross-origin",
+      ])
+    );
+    expect(rules.get("/_next/static/*")).toContain(
+      "Cache-Control: public, max-age=31536000, immutable"
+    );
+    for (const [path, headers] of rules) {
+      if (path === "/_next/static/*") continue;
+      expect(headers.join("\n")).not.toContain("immutable");
+    }
+  });
+});

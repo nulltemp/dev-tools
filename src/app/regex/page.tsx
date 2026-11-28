@@ -20,6 +20,7 @@ import {
   normalizeFlags,
   REGEX_FLAGS,
   splitByMatches,
+  toggleFlags,
   type RegexInput,
   type RegexMatch,
   type RegexResult,
@@ -109,7 +110,7 @@ export default function RegexPage() {
           size="small"
           color="primary"
           value={flags}
-          onChange={(_, value: string[]) => setFlags(value)}
+          onChange={(_, value: string[]) => setFlags((prev) => toggleFlags(prev, value))}
           aria-label="フラグ"
           sx={{ flexWrap: "wrap" }}
         >
