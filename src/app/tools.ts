@@ -6,7 +6,7 @@ export const PRIVACY_POLICY_URL = "https://nulltemp.com/privacy/";
 export const KOFI_URL = "https://ko-fi.com/nulltemp";
 export const GITHUB_URL = "https://github.com/nulltemp/dev-tools";
 export const SITE_DESCRIPTION =
-  "JSON整形、JWTデコーダー、Base64(画像・data URL)・URLエンコード、UUID・パスワード生成、ハッシュ生成(SHA-256)、Unixタイムスタンプ変換、テキスト差分、正規表現テスターなど、開発に便利なツール集";
+  "JSON整形、JWTデコーダー、Base64(画像・data URL)・URLエンコード、UUID・パスワード生成、ハッシュ生成(SHA-256)、Unixタイムスタンプ変換、テキスト差分、正規表現テスター、進数変換(2進数・16進数)など、開発に便利なツール集";
 
 // 静的ホスティングで Content-Type が正しく付くよう拡張子付きの静的画像を使う
 export const OG_IMAGE = {
@@ -79,6 +79,11 @@ export const tools: Tool[] = [
     href: "/regex",
     name: "正規表現テスター",
     description: "正規表現をテキストに当て、一致した箇所・キャプチャグループ・置換結果を表示します",
+  },
+  {
+    href: "/base-convert",
+    name: "進数変換",
+    description: "整数を2進数・8進数・10進数・16進数に相互に変換します",
   },
 ];
 

@@ -523,3 +523,25 @@ test.describe("正規表現テスター", () => {
     );
   });
 });
+
+test.describe("進数変換", () => {
+  test("10進数を各進数に変換し、16進数の入力と不正な文字のエラー", async ({ page }) => {
+    await page.goto("/base-convert");
+    const input = page.getByLabel("変換する数値");
+    await input.fill("18446744073709551617");
+    await expect(definition(page, "2進数")).toHaveText(`1${"0".repeat(63)}1`);
+    await expect(definition(page, "8進数")).toHaveText("2000000000000000000001");
+    await expect(definition(page, "16進数")).toHaveText("10000000000000001");
+    await expect(page.getByRole("button", { name: "16進数をコピー" })).toBeVisible();
+
+    await page.getByRole("button", { name: "16進数", exact: true }).click();
+    await input.fill("-0xFF_FF");
+    await expect(definition(page, "10進数")).toHaveText("-65535");
+    await page.getByLabel("2進数を4桁ごとに区切る").check();
+    await expect(definition(page, "2進数")).toHaveText("-1111 1111 1111 1111");
+
+    await input.fill("0xfg");
+    await expect(errorAlert(page)).toContainText("4文字目の「g」");
+    await expect(page.getByRole("button", { name: "10進数をコピー" })).toHaveCount(0);
+  });
+});
